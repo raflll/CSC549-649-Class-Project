@@ -1,0 +1,45 @@
+Part 1: Data and pipeline
+
+QUESTION
+Are the reads of good quality, and where do they map in the genome?
+
+DATA
+Gene Expression Omnibus (GEO) series GSE50244, Sequence Read Archive (SRA) study SRP029262, Fadista et al., PNAS 2014. Pancreatic islets from 89 deceased donors, Illumina HiSeq 2000, paired-end, 2 x 101 bases. GEO lists age, sex, body mass index (BMI) and glycated hemoglobin (HbA1c), but not the diagnosis. We used the cut-offs of the original study: type 2 diabetes (T2D) with HbA1c >= 6.5% and non-diabetic (ND) with HbA1c < 6.0%. Donors with HbA1c 6.0-6.4% or without HbA1c were not used. This gave 11 T2D and 51 ND donors.
+We chose 4 women and 4 men with T2D. Each was paired with an ND donor of the same sex and similar age and BMI (Table1_donors.csv).
+
+METHODS
+1. Download with fastq-dump --split-files (SRA Toolkit). All reads were used. The read numbers match the European Nucleotide Archive (ENA).
+2. Quality check with FastQC.
+3. Reference: human genome GRCh38 from Ensembl (HISAT2 index) and Ensembl gene annotation release 110 (GTF file).
+4. Mapping with HISAT2, sorting and indexing with samtools. HISAT2 can split a read across an intron, Bowtie2 cannot.
+5. Gene counts with StringTie -e and prepDE.py. HISAT2 and StringTie replace TopHat and Cufflinks in the new Tuxedo protocol.
+6. Transcript assembly with StringTie and stringtie --merge (merged.gtf).
+7. mapping_table.csv made with a Python script from the HISAT2 logs and the read names.
+
+Software: SRA Toolkit 3.4.1, FastQC 0.13.0, HISAT2 2.2.3, SAMtools 1.25, StringTie 2.1.7.
+
+STORAGE
+All steps ran on one laptop (Windows Subsystem for Linux (WSL), 20 cores, 15 GB memory). The data take about 323 GB: FASTQ 248 GB, BAM 59 GB and reference 9.5 GB. They are kept on the laptop. This folder holds only the results.
+
+RESULTS
+- 382,369,864 read pairs, 14.8 to 32.0 million per donor.
+- FastQC: all 32 files pass per sequence quality scores and adapter content. Per base sequence quality fails in both files of 9 donors. Per base sequence content fails in all files, which is typical for RNA-seq libraries.
+- Mapping: 92.0% of the reads on average (86.2 to 96.7%). 81.6% of the read pairs map to one position (72.1 to 90.5%).
+- 62,754 genes x 16 donors. 21,710 genes have no reads. Glucagon (GCG) is in the top 15 genes of every donor. Insulin (INS) ranges from 8,115 to 1,084,667 reads.
+- merged.gtf: 284,533 transcripts, 31,934 of them not in Ensembl.
+
+BATCH EFFECT
+The read names show two flow cells.
+  Batch A (C11YEACXX): 9 donors, 6 T2D and 3 ND, 89.6% mapped on average.
+  Batch B (D088TACXX): 7 donors, 2 T2D and 5 ND, 95.1% mapped on average.
+All batch A donors map lower than all batch B donors. The 9 donors that fail per base sequence quality are the batch A donors. Batch A holds 6 of the 8 T2D donors, so batch should be included in the DESeq2 model (design ~ batch + group).
+
+CAVEATS
+- T2D is defined by HbA1c only. Treated donors may be in the ND group.
+- Two ND donors have HbA1c 5.7% (SRR957947) and 5.8% (SRR957909), in the prediabetes range of the American Diabetes Association (5.7-6.4%).
+- Pair P1 differs in age (45 vs 62).
+- In three ND donors (SRR957909, SRR957947, SRR957957) INS is not among the top 200 genes, which may reflect low islet purity.
+- 8 vs 8 donors is a small sample.
+
+CONCLUSION
+The reads are of good quality. All 32 files pass the per sequence quality check and none needs adapter trimming. On average 92.0% of the reads map to the human genome (GRCh38), and 81.6% of the read pairs map to a single position, so the gene counts rest on reliable alignments. Quality and mapping are lower in batch A than in batch B, and batch A holds 6 of the 8 T2D donors. The data are suitable for the comparison of T2D and ND donors, provided that batch is included in the model.

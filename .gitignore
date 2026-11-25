@@ -1,0 +1,42 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Archives (the folders are the source of truth)
+*.zip
+*.tar
+*.tar.gz
+
+# Raw / intermediate sequencing data (hundreds of GB, kept off GitHub)
+fastq/
+bam/
+ref/
+quant/
+assembly/
+*.fastq
+*.fastq.gz
+*.fq
+*.fq.gz
+*.sra
+*.bam
+*.bai
+*.sam
+*.ht2
+*.log
+
+# Uncompressed GTF (merged.gtf.gz is kept)
+*.gtf
+
+# R
+.Rhistory
+.RData
+.Rproj.user/
+*.rds
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/

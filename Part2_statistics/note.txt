@@ -1,0 +1,42 @@
+Part 2: Statistics
+
+QUESTION
+Which genes differ between type 2 diabetes (T2D) and non-diabetic (ND) islets?
+
+DATA
+Input from Part 1: gene_count_matrix.csv (raw counts, 62,754 genes x 16 donors), Table1_donors.csv (8 T2D and 8 ND donors, 4 women and 4 men per group, paired on sex, age and BMI) and mapping_table.csv (flow cell = batch). Batch A (C11YEACXX): 6 T2D + 3 ND. Batch B (D088TACXX): 2 T2D + 5 ND.
+
+WHAT WE DID, WHY AND HOW
+1. Islet QC (figures/qc_purity.png, figures/qc_sex.png, results/qc_islet_purity_sex.csv)
+   Why: islet preparations contain exocrine tissue, and a wrong sex label would mean a sample swap.
+   How: share of all reads (counts per million) from endocrine hormone genes (INS, GCG, SST, PPY, GHRL), acinar genes (PRSS1/2, CPA1/2, CELA3A/B, CTRB1/2, PNLIP, CPB1, CEL, CLPS, REG1A) and ductal genes (KRT19, KRT7, CFTR, SPP1). Sex from XIST (female) vs seven chrY genes (RPS4Y1, DDX3Y, KDM5D, UTY, EIF1AY, USP9Y, ZFY). A donor is flagged as low purity when its endocrine share is below half the median.
+2. PCA (figures/pca.png, figures/pca_batch_sex_removed.png, results/pca_associations.csv)
+   Why: to see how the donors group and whether group, batch or sex drive the main variation.
+   How: DESeq2 variance-stabilising transform (vst, blind), 500 most variable genes, prcomp. Second plot after removing batch and sex with limma::removeBatchEffect (for display only). Each of PC1-5 was tested against group, batch and sex (t-test) and correlated with endocrine share.
+3. Differential expression (results/de_results.csv)
+   Why: DESeq2 models raw counts with a negative binomial and shares information across genes, which suits small groups.
+   How: genes with >= 10 reads in >= 8 donors were kept (19,072). Design ~ batch + sex + group, with ND as reference, so the T2D effect is estimated within batch and sex. Batch is in the model as recommended in Part 1. Sex is added because sex genes are a large source of variation (PC2) and the groups are balanced on sex, so it costs little. Wald test, Benjamini-Hochberg FDR. Fold changes also shrunk with apeglm (column log2FoldChange_shrunk) for ranking and plotting.
+   Gene lists: up_genes.txt / down_genes.txt = FDR < 0.05, higher / lower in T2D. expressed_genes.txt = all 19,072 tested genes, the background for enrichment analysis.
+4. Volcano and MA plots (figures/volcano.png, figures/ma_plot.png).
+5. Sensitivity (results/sensitivity_models.csv, results/sensitivity_top_genes.csv): the same test with ~ batch + group, with islet purity (endocrine share) added as a covariate, and without the two batch B T2D donors.
+6. Genes reported in earlier T2D islet studies (results/known_t2d_genes.csv).
+
+RESULTS
+- QC, sex: reported sex matches XIST/chrY expression in all 16 donors. No sample swaps.
+- QC, purity: endocrine genes make up 0.5% to 7.8% of reads, acinar genes 0.2% to 10.8%. Two donors are low purity: P1_T2D (endocrine 0.5%, acinar 8.8%) and P3_ND (endocrine 1.0%, acinar 10.8%). Purity varies a lot within both groups and does not differ systematically between them.
+- PCA: T2D and ND donors do not separate. PC1 (33.7%) is not related to group, batch or sex; it is driven by P7_T2D at one end and by genes of extracellular matrix, stress and hypoxia (COL7A1, HSPG2, ANGPTL4, SLC16A3, MT2A, GDF15) vs beta-cell genes (SLC2A2, IAPP). PC2 (18%) is sex (p = 1e-4). PC4 (9%) is batch (p = 7e-4) and correlates with endocrine share (r = 0.59).
+- Differential expression (~ batch + sex + group): 6 genes at FDR < 0.05, 5 higher in T2D (AK4, LOX, SYNDIG1L, LUCAT1, IGFBP3) and 1 lower (TSPAN33). 11 genes at FDR < 0.1, 306 at raw p < 0.01. Most changes with small p values are increases in T2D (volcano skewed to the right).
+- The top hits are driven by two donors. AK4, LOX, IGFBP3 and LUCAT1 are about 10-15 times higher in P7_T2D and P8_T2D (the two T2D donors of batch B) than in all other donors. These genes, with ANGPTL4, SLC16A3 and GDF15 on PC1, are typical hypoxia and stress response genes, which points to islet isolation or culture stress in those two preparations rather than to diabetes itself.
+- Sensitivity: without P7_T2D and P8_T2D, none of the 6 genes stays significant (4 other genes reach FDR < 0.05). With ~ batch + group only 1 gene (TSPAN33) passes. Adding purity as a covariate gives 23 genes, which include all 6. TSPAN33 (raw p = 0.002) and SYNDIG1L (raw p = 7e-5) keep small p values without the two donors; TSPAN33 is lower in T2D in all models and is the most robust single result.
+- Known T2D islet genes: SLC2A2 (log2FC -1.75, p = 0.007), RASGRP1, PPP1R1A, GLRA1, CAPN13, CHL1 and PDX1 are all lower in T2D with raw p < 0.07, the same direction as in Fadista et al. 2014, but none passes FDR. IAPP, ABCC8 and SLC30A8 trend down; INS, GCG and TCF7L2 do not change.
+
+CAVEATS
+- 8 vs 8 donors gives little power; with 19,072 tests only large and consistent changes reach FDR < 0.05.
+- Batch is partly confounded with group (6 of 8 T2D in batch A). The model adjusts for batch, but then the T2D effect in batch B rests on only 2 T2D donors, and these two drive the top hits.
+- Islet purity varies 15-fold between donors. Differences in cell composition can look like expression changes. A purity covariate changes the result, so the main gene list should be read together with the sensitivity table.
+- T2D is defined by HbA1c only (see Part 1); treatment, culture time and cause of death are not known and may differ between groups.
+- Pairs were not used as a blocking factor: the donors of a pair are different people matched on sex, age and BMI, not repeated measures.
+- Counts come from StringTie + prepDE.py (coverage-based estimates), not from a read counter such as featureCounts.
+
+CONCLUSION
+T2D and ND islets do not separate in PCA; the main sources of variation are a stress/hypoxia signature, sex, batch and islet purity. DESeq2 finds 6 genes at FDR < 0.05 (AK4, LOX, SYNDIG1L, LUCAT1, IGFBP3 up; TSPAN33 down), but 4 of the 6 (AK4, LOX, LUCAT1, IGFBP3) are driven by two T2D donors with a strong hypoxia signature; TSPAN33 and SYNDIG1L are the most robust. Known beta-cell genes (SLC2A2, PPP1R1A, CAPN13, CHL1, GLRA1) are lower in T2D, as in the original study, but do not reach FDR in 16 donors. The data support a modest loss of beta-cell gene expression in T2D, not a large, clear-cut set of differentially expressed genes.

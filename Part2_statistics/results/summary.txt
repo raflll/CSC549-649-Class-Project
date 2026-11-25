@@ -1,0 +1,170 @@
+Genes in matrix: 62754 
+Genes tested (>= 10 reads in >= 8 donors): 19072 
+FDR < 0.05 : 6 genes ( 5 up, 1 down in T2D )
+FDR < 0.1: 11 
+Raw p < 0.01: 306 
+
+Top 25 genes by p value:
+        symbol baseMean log2FoldChange log2FoldChange_shrunk   pvalue    padj
+           AK4    927.8          2.451              2.32e+00 7.39e-09 0.00014
+       TSPAN33    692.8         -1.012             -9.01e-01 2.66e-06 0.01807
+           LOX    725.7          2.010              1.84e+00 2.86e-06 0.01807
+      SYNDIG1L     50.8          2.530              2.17e+00 7.59e-06 0.03603
+        LUCAT1    743.6          2.195              1.97e+00 1.34e-05 0.04616
+        IGFBP3  11690.5          2.146              1.92e+00 1.46e-05 0.04616
+       TMEM158    470.2          1.972              1.76e+00 1.88e-05 0.05087
+         TREM1    372.1          2.502              2.22e+00 2.83e-05 0.06722
+       TMEM265     32.5          3.019              2.61e+00 3.38e-05 0.07123
+          <NA>     67.4          3.644              3.13e+00 4.42e-05 0.08393
+         MTCP1     69.7          1.252              1.08e+00 5.29e-05 0.09126
+        IGFBP6    212.2          2.910              2.55e+00 7.22e-05 0.11424
+          PAOX     46.6          4.069              3.28e+00 8.07e-05 0.11787
+       PCOLCE2     35.6          2.438              1.79e+00 9.30e-05 0.12467
+         THBS2   9691.7          2.111              1.87e+00 9.97e-05 0.12467
+ PKD1P6-NPIPP1    159.7          1.375              1.16e+00 1.13e-04 0.12467
+         PLOD2  15104.4          1.050              9.02e-01 1.18e-04 0.12467
+        PIWIL2     53.9          1.949              1.63e+00 1.18e-04 0.12467
+        PDE10A   1539.2          0.963              8.14e-01 1.57e-04 0.15689
+      C11orf96    392.1          2.818              2.42e+00 1.72e-04 0.16337
+          G0S2   1972.3          3.165              2.71e+00 2.00e-04 0.17116
+        RCN1P2     47.5          2.015              1.60e+00 2.07e-04 0.17116
+           MRO     42.8         -1.518             -8.35e-06 2.07e-04 0.17116
+          HIC1    311.2          2.220              1.89e+00 2.23e-04 0.17186
+          <NA>    360.5          1.949              1.64e+00 2.41e-04 0.17186
+
+PCA variance (%): 33.7 18 10.8 9 5.4 
+  PC var_pct p_group  p_batch    p_sex r_endocrine_pct
+ PC1    33.7   0.203 0.826915 0.501141          -0.178
+ PC2    18.0   0.637 0.596286 0.000107          -0.162
+ PC3    10.8   0.185 0.093907 0.771643          -0.167
+ PC4     9.0   0.777 0.000651 0.660297           0.586
+ PC5     5.4   0.505 0.856991 0.199024          -0.135
+
+QC:
+  label batch library_size endocrine_pct acinar_pct ductal_pct    sex
+  P7_ND     B     36532355         2.369      0.174      0.028   Male
+ P1_T2D     A     35393026         0.492      8.787      0.178 Female
+  P6_ND     A     36738393         2.317      1.421      0.199   Male
+  P5_ND     A     39086432         2.908      1.870      0.463   Male
+  P4_ND     A     40702971         6.955      3.109      0.234 Female
+  P1_ND     B     26322003         2.423      5.700      0.526 Female
+ P2_T2D     A     43993359         7.836      1.076      0.162 Female
+ P3_T2D     A     35690103         3.159      4.927      0.266 Female
+  P3_ND     B     25209493         1.012     10.767      0.300 Female
+ P5_T2D     A     42438730         5.207      8.372      0.178   Male
+ P4_T2D     A     39417233         2.223      6.108      0.461 Female
+  P8_ND     B     34553940         3.429      2.678      0.189   Male
+  P2_ND     B     29341216         2.393      4.199      0.830 Female
+ P6_T2D     A     42947616         7.345      0.339      0.149   Male
+ P7_T2D     B     44088355         3.330      5.308      0.310   Male
+ P8_T2D     B     32961112         1.690      1.045      0.386   Male
+ sex_from_expr sex_match low_purity
+          Male      TRUE      FALSE
+        Female      TRUE       TRUE
+          Male      TRUE      FALSE
+          Male      TRUE      FALSE
+        Female      TRUE      FALSE
+        Female      TRUE      FALSE
+        Female      TRUE      FALSE
+        Female      TRUE      FALSE
+        Female      TRUE       TRUE
+          Male      TRUE      FALSE
+        Female      TRUE      FALSE
+          Male      TRUE      FALSE
+        Female      TRUE      FALSE
+          Male      TRUE      FALSE
+          Male      TRUE      FALSE
+          Male      TRUE      FALSE
+
+Sensitivity:
+                           model n_fdr05 overlap_with_main
+    ~ batch + sex + group (main)       6                 6
+                 ~ batch + group       1                 1
+  ~ batch + sex + purity + group      23                 6
+ main, without P7_T2D and P8_T2D       4                 0
+         ensembl   symbol padj_main padj_batch_group padj_with_purity
+ ENSG00000162433      AK4   0.00014               NA         0.000335
+ ENSG00000158457  TSPAN33   0.01807           0.0253         0.002632
+ ENSG00000113083      LOX   0.01807           0.0988         0.013044
+ ENSG00000183379 SYNDIG1L   0.03603           0.0988         0.022527
+ ENSG00000248323   LUCAT1   0.04616           0.1012         0.002632
+ ENSG00000146674   IGFBP3   0.04616           0.5409         0.022527
+ padj_without_P7P8_T2D pvalue_without_P7P8_T2D
+                 0.991                1.81e-03
+                 0.991                2.04e-03
+                 0.991                3.06e-02
+                 0.255                6.72e-05
+                 0.991                7.12e-02
+                 0.991                9.41e-02
+
+Known T2D islet genes:
+  symbol baseMean log2FoldChange  pvalue  padj
+  SLC2A2      353        -1.7477 0.00685 0.574
+ RASGRP1      553        -0.9124 0.01636 0.640
+ PPP1R1A     4502        -1.0702 0.01683 0.644
+   GLRA1      186        -1.3077 0.02737 0.666
+  CAPN13     1207        -1.0491 0.03962 0.723
+    CHL1      413        -1.1971 0.05076 0.745
+    PDX1     1725        -0.7684 0.06972 0.765
+    ARG2     1300        -0.6942 0.08108 0.769
+   UNC5D      393        -0.8222 0.09966 0.789
+     INS   144300         1.2225 0.10413 0.796
+ CCDC141      108        -0.7271 0.10591 0.796
+    IAPP    91004        -0.9610 0.20901 0.851
+   ABCC8    10765        -0.6809 0.21542 0.851
+   SFRP4      318         1.3873 0.21637 0.851
+   FFAR4      272        -0.5372 0.35692 0.893
+ SLC30A8    35204        -0.3324 0.49002 0.927
+    MAFA      458         0.3785 0.56881 0.948
+   G6PC2    16061        -0.3378 0.57114 0.948
+     GCG   990220        -0.2301 0.67637 0.967
+  TCF7L2      809         0.0378 0.85357 0.984
+   LRFN2      147         0.0624 0.90488 0.990
+
+R version 4.3.2 (2023-10-31)
+Platform: aarch64-apple-darwin20 (64-bit)
+Running under: macOS 15.6.1
+
+Matrix products: default
+BLAS:   /Library/Frameworks/R.framework/Versions/4.3-arm64/Resources/lib/libRblas.0.dylib 
+LAPACK: /Library/Frameworks/R.framework/Versions/4.3-arm64/Resources/lib/libRlapack.dylib;  LAPACK version 3.11.0
+
+locale:
+[1] C
+
+time zone: America/New_York
+tzcode source: internal
+
+attached base packages:
+[1] stats4    stats     graphics  grDevices utils     datasets  methods  
+[8] base     
+
+other attached packages:
+ [1] limma_3.58.1                ggrepel_0.9.6              
+ [3] ggplot2_3.5.2               DESeq2_1.42.1              
+ [5] SummarizedExperiment_1.32.0 Biobase_2.62.0             
+ [7] MatrixGenerics_1.14.0       matrixStats_1.5.0          
+ [9] GenomicRanges_1.54.1        GenomeInfoDb_1.38.8        
+[11] IRanges_2.36.0              S4Vectors_0.40.2           
+[13] BiocGenerics_0.48.1        
+
+loaded via a namespace (and not attached):
+ [1] gtable_0.3.6            lattice_0.22-5          numDeriv_2016.8-1.1    
+ [4] vctrs_0.6.5             tools_4.3.2             bitops_1.0-8           
+ [7] generics_0.1.3          parallel_4.3.2          tibble_3.2.1           
+[10] fansi_1.0.6             pkgconfig_2.0.3         Matrix_1.6-5           
+[13] RColorBrewer_1.1-3      lifecycle_1.0.4         GenomeInfoDbData_1.2.11
+[16] compiler_4.3.2          farver_2.1.2            textshaping_0.4.0      
+[19] statmod_1.5.0           codetools_0.2-19        RCurl_1.98-1.20        
+[22] pillar_1.9.0            crayon_1.5.3            MASS_7.3-60.0.1        
+[25] BiocParallel_1.36.0     DelayedArray_0.28.0     emdbook_1.3.13         
+[28] abind_1.4-8             tidyselect_1.2.1        locfit_1.5-9.12        
+[31] bdsmatrix_1.3-7         mvtnorm_1.3-3           dplyr_1.1.4            
+[34] labeling_0.4.3          grid_4.3.2              colorspace_2.1-1       
+[37] cli_3.6.5               SparseArray_1.2.4       magrittr_2.0.3         
+[40] S4Arrays_1.2.1          utf8_1.2.4              withr_3.0.2            
+[43] scales_1.4.0            XVector_0.42.0          ragg_1.3.2             
+[46] coda_0.19-4.1           bbmle_1.0.25.1          rlang_1.1.6            
+[49] Rcpp_1.0.13             glue_1.7.0              apeglm_1.24.0          
+[52] plyr_1.8.9              R6_2.5.1                systemfonts_1.1.0      
+[55] zlibbioc_1.48.2        

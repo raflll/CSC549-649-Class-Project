@@ -1,0 +1,5 @@
+"model","n_fdr05","overlap_with_main"
+"~ batch + sex + group (main)",6,6
+"~ batch + group",1,1
+"~ batch + sex + purity + group",23,6
+"main, without P7_T2D and P8_T2D",4,0
