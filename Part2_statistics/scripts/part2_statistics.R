@@ -156,7 +156,8 @@ write.csv(pc_assoc, file.path(res_dir, "pca_associations.csv"), row.names = FALS
 
 # ---------------------------------------------------------------- DE results
 res  <- results(dds, contrast = c("group", "T2D", "ND"), alpha = PADJ)
-shr  <- lfcShrink(dds, coef = "group_T2D_vs_ND", type = "apeglm", quiet = TRUE)
+shr  <- lfcShrink(dds, coef = "group_T2D_vs_ND", type = "apeglm",
+                 apeMethod = "nbinomC*", quiet = TRUE)   # default optimiser left 101 genes unfitted
 out  <- data.frame(genes[rownames(res), ],
                    baseMean = res$baseMean,
                    log2FoldChange = res$log2FoldChange,
@@ -199,7 +200,7 @@ p <- ggplot(v, aes(log2FoldChange, -log10(pvalue), colour = class)) +
 ggsave(file.path(fig_dir, "volcano.png"), p, width = 7, height = 6, dpi = 200)
 
 png(file.path(fig_dir, "ma_plot.png"), width = 1400, height = 1100, res = 200)
-plotMA(shr, ylim = c(-4, 4),
+DESeq2::plotMA(shr, ylim = c(-4, 4), alpha = PADJ,
        main = "MA plot, shrunken log2 fold change (apeglm)")
 dev.off()
 
