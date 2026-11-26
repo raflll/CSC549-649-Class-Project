@@ -1,0 +1,44 @@
+Part 3: Promoters and non-coding RNAs
+
+QUESTION
+Do the genes that change in type 2 diabetes (T2D) share promoter motifs, and are non-coding RNAs over-represented among them?
+
+DATA
+Part 2: results/de_results.csv (DESeq2, 19,072 tested genes, T2D vs ND). Part 1: merged.gtf.gz (StringTie assembly, 16 donors). Ensembl release 110 GTF (gene types, same as Part 1) and the GRCh38 primary assembly. JASPAR 2024 CORE vertebrates non-redundant motifs (879 matrices). All genes are tracked by Ensembl ID, not symbol.
+
+WHAT WE DID, WHY AND HOW
+1. Gene table (scripts/01_genes.py)
+   Why: gene types and promoter positions are needed for every later step.
+   How: one row per Ensembl gene with gene type, strand and transcription start site (TSS: start on the + strand, end on the - strand). Gene types were grouped into protein_coding, lncRNA, pseudogene, small_RNA and other.
+2. Changed genes and gene types (scripts/02_biotypes.py, figures/biotype_bar.png, figures/biotype_changed_rate.png, results/biotype_table.csv)
+   Why: this answers the non-coding RNA part of the question.
+   How: changed gene = padj < 0.05; if fewer than 30 genes per direction pass, p < 0.05 instead. Only 6 genes pass padj < 0.05, so p < 0.05 was used (1,039 up and 228 down in T2D). The rule was set before any motif or gene type test. The background is the other 17,805 tested genes. Fisher exact test per gene type and Benjamini-Hochberg correction. Lowly expressed genes (lncRNAs) have less power to be called changed, so the test was repeated inside five expression bins and combined (Mantel-Haenszel).
+3. New transcripts (scripts/03_novel.py, figures/novel_classes.png, results/novel_transcripts.csv, results/novel_summary.txt)
+   Why: Part 1 assembled transcripts that Ensembl does not have; some may be new non-coding RNAs.
+   How: transcripts in merged.gtf without an Ensembl ID were sorted by the class of their StringTie locus: new isoform of a known gene, or new locus (antisense, same-strand overlap, intergenic, no strand). A lncRNA candidate is a new antisense or intergenic transcript with at least 2 exons and at least 200 nt. Coding potential was not tested.
+4. Promoter sequences (scripts/04_promoters.py, results/promoters_*.fa)
+   Why: motifs are searched in the DNA next to the TSS.
+   How: 1000 bp before to 200 bp after the TSS (1,201 bp), read on the gene strand, for the up, down and background genes (3 genes at chromosome ends were skipped).
+5. Motif search (scripts/05_motifs.py, results/motif_results.csv, figures/motif_top.png)
+   Why: to find transcription factor motifs that are more or less frequent in the promoters of changed genes.
+   How: each JASPAR matrix was converted to log-odds scores (uniform background, pseudocount 0.8) and slid over both strands. A promoter is a hit if its best score is at least 85% of the way from the worst to the best possible score. Every changed promoter received the 5 unchanged promoters closest in GC content and CpG observed/expected ratio (no reuse). Fisher exact test and Benjamini-Hochberg correction over 879 motifs, separately for up, down and all changed genes.
+   Matching on GC alone was not enough: up promoters have less CpG than background promoters of the same GC, and two CpG-linked motifs (ZNF93, NRF1) reached q < 0.05 by this artifact. With GC and CpG matched, the means are equal (up: GC 0.565 vs 0.565, CpG 0.554 vs 0.554).
+
+RESULTS
+- Changed genes: 6 genes at padj < 0.05, 1,267 at p < 0.05. Chance alone gives about 950 of 19,072, so the p < 0.05 list is probably mostly false positives (at most about 25% real). 1,039 of the 1,267 are higher in T2D.
+- Gene types (results/biotype_table.csv): lncRNAs are under-represented among changed genes, 11.2% of up and 11.4% of down genes against 14.2% of the background (odds ratio 0.71 after expression matching, q = 0.001). Protein-coding genes are enriched (odds ratio 1.36, q = 0.0005). The rates explain it: 5.3% of lncRNAs (142 of 2,668) are called changed, the 5% expected by chance, against 6.9% of protein-coding genes (1,038 of 14,976).
+- Small RNAs are the exception: 13 of 49 tested are changed and 12 of the 13 are lower in T2D (odds ratio 4.9, q < 0.0001). They are 6 copies of 5.8S rRNA, 4 mitochondrial tRNAs and 3 RN7SL-type genes. 20 of all 22 mitochondrial tRNAs have a negative fold change. This is one shared shift, not 13 independent findings, and in a poly-A library it may be technical (RNA composition, mitochondrial content, normalization).
+- Motifs: no motif has q < 0.05 in the up, down or changed set. The closest are ELF4 and Zbtb2 (fewer hits in changed promoters, q = 0.051). 4.2% to 5.3% of the 879 motifs have p < 0.05, which is what chance gives. Islet factors chosen before the test (PDX1, NKX6-1, FOXA2, HNF1A, MAFA, NEUROD1, RFX family) show nothing; MAFA is nominally higher in changed promoters (odds ratio 1.28, p = 0.010, q = 0.61).
+- New transcripts: 31,934 of 284,533 transcripts are not in Ensembl. 30,711 (96.2%) are new isoforms of known genes; the rest are 419 antisense, 252 intergenic, 154 same-strand overlaps and 398 single-exon transcripts without strand. 618 transcripts in 458 loci are lncRNA candidates.
+
+CAVEATS
+- The changed lists use p < 0.05 without multiple-testing control, and up to 75% of them may be chance. 8 vs 8 donors with a batch effect gives low power. A negative motif result does not show that no motif is involved.
+- Part 2 shows that the top genes are driven by two T2D donors with a stress signature and that adding islet purity to the model changes its gene list (23 genes instead of 6). The Part 3 lists would probably change with that model. 1,039 up against 228 down is unbalanced.
+- The count matrix covers Ensembl genes only, so new transcripts have no counts and cannot be tested for change.
+- The library is poly-A selected, which under-counts non-polyadenylated RNAs (many small RNAs).
+- One TSS per gene (outermost start). A gene with several promoters may be tested at an inactive one. Pairs of genes on opposite strands close together share a window and are counted twice.
+- A motif hit shows that a factor could bind, not that it does. Similar motifs form families. The 85% score cut-off makes short motifs hit in over 95% of promoters, which lowers power for them. Promoters miss enhancers.
+- No cross-check with HOMER, MEME or bedtools, and no overlap with T2D risk loci. lncRNA candidates were not checked for coding potential.
+
+CONCLUSION
+Non-coding RNAs are not over-represented among the genes changed in T2D islets, with one exception that needs checking: small RNAs (mainly 5.8S rRNA and mitochondrial tRNAs) are mostly lower in T2D. lncRNAs are under-represented (odds ratio 0.71, q = 0.001) because they are called changed at the chance rate, while the weak signal sits in protein-coding genes. No JASPAR motif is enriched in the promoters of changed genes after correction, with GC and CpG matched (ELF4 is closest, q = 0.051). The result is limited by 8 vs 8 donors, a batch effect and a noise-heavy gene list, so it shows no detectable promoter signal, not proof of none. Next steps: rerun on Part 2's purity-adjusted model and without P7_T2D and P8_T2D, test motifs on the ranked gene list instead of a cut-off, and quantify the 458 lncRNA-candidate loci. The Part 1 assembly holds them for follow-up.
