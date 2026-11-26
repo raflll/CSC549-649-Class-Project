@@ -7,7 +7,7 @@ Pancreatic islet RNA-seq from GEO GSE50244 (Fadista et al., PNAS 2014): 8 T2D an
 | [`Part1_data_pipeline/`](Part1_data_pipeline) | 1. Data and pipeline | download, FastQC, HISAT2 mapping, StringTie counts, `gene_count_matrix.csv` |
 | [`Part2_statistics/`](Part2_statistics) | 2. Statistics | islet QC, PCA, DESeq2 differential expression, volcano plot |
 | [`Part3_promoters_ncrna/`](Part3_promoters_ncrna) | 3. Promoters and non-coding RNAs | gene types of changed genes, promoter motif search, new transcripts |
-| [`Part4/`](Part4) | 4. | not started |
+| [`Part4/`](Part4) | 4. Pathways and biology | GSEA, pathway enrichment, marker genes and donor sensitivity analysis |
 
 Each part has a `README.md` (files and how to run) and a `note.txt` (what, why, how, results, caveats).
 

@@ -5,19 +5,15 @@ Main result : GSEA on the full ranked gene list (DESeq2 Wald stat).
 Supporting  : g:Profiler over-representation on genes with raw p < 0.01 (exploratory:
               only 6 genes pass FDR 0.05, so an FDR-based list would be useless).
 
-Run from the Part4 folder:   python3 scripts/part4_pathways.py
-
-Resumable: a library whose results/gsea_<name>.csv already exists is skipped.
-Use --force to redo everything.
-Offline test: --gmt toy.gmt --skip-ora
+Run from Part4: python3 scripts/part4_pathways_v2.py
+Each run writes to a fresh directory; the submitted results are not overwritten.
 """
-import argparse, io, os, sys, time
+import argparse, io, os
 import numpy as np, pandas as pd
 import matplotlib; matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import gseapy as gp
-
-ENRICHR_GMT = "https://maayanlab.cloud/Enrichr/geneSetLibrary?mode=text&libraryName={}"
+from pathway_utils import LIBRARIES, get_gmt, rank_genes, new_dir, lead_genes
 
 # hypoxia / stress genes that Part 2 reports as driven by P7_T2D and P8_T2D.
 STRESS = ["AK4", "LOX", "IGFBP3", "LUCAT1", "ANGPTL4", "SLC16A3", "GDF15",
@@ -28,15 +24,16 @@ BETA = ["SLC2A2", "RASGRP1", "PPP1R1A", "GLRA1", "CAPN13", "CHL1", "PDX1",
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--de", default="../Part2_statistics/results/de_results.csv")
-ap.add_argument("--gmt", nargs="*", help="local .gmt files instead of Enrichr libraries")
+ap.add_argument("--output-dir", default="reruns/primary")
+ap.add_argument("--threads", type=int, default=2)
 ap.add_argument("--skip-ora", action="store_true")
-ap.add_argument("--force", action="store_true", help="redo libraries already finished")
 ap.add_argument("--nperm", type=int, default=10000)
 ap.add_argument("--p-cut", type=float, default=0.01)
 a = ap.parse_args()
 
-RES, FIG, GMT = "results", "figures", "genesets"
-for d in (RES, FIG, GMT):
+root = new_dir(a.output_dir)
+RES, FIG = str(root / "results"), str(root / "figures")
+for d in (RES, FIG):
     os.makedirs(d, exist_ok=True)
 
 log_lines = []
@@ -47,91 +44,34 @@ def say(*x):
 
 # ---------------------------------------------------------------- ranked list
 de = pd.read_csv(a.de)
-rk = de.dropna(subset=["symbol", "stat"]).copy()
-rk["abs"] = rk["stat"].abs()
-rk = rk.sort_values("abs", ascending=False).drop_duplicates("symbol")
-rk = rk[["symbol", "stat"]].sort_values("stat", ascending=False).reset_index(drop=True)
+rk = rank_genes(de)
 rk.to_csv(f"{RES}/ranked_list.csv", index=False)
 say(f"ranked genes: {len(rk)} of {len(de)} tested "
     f"({de.symbol.isna().sum()} have no symbol, {de.symbol.dropna().duplicated().sum()} duplicate symbols)")
 
-# ---------------------------------------------------------------- gene sets
-def get_gmt(name):
-    """Return a local .gmt path. Downloads from Enrichr once and caches as UTF-8.
-
-    Doing the download here instead of inside gseapy avoids the Windows cp1252
-    crash on Greek letters in pathway names.
-    """
-    if name.endswith(".gmt"):
-        return name
-    path = os.path.join(GMT, name + ".gmt")
-    if os.path.exists(path) and os.path.getsize(path) > 1000:
-        return path
-    import requests
-    for attempt in (1, 2, 3):
-        try:
-            r = requests.get(ENRICHR_GMT.format(name), timeout=180)
-            r.raise_for_status()
-            text = r.content.decode("utf-8", errors="replace")
-            if len(text) < 1000 or "\t" not in text:
-                raise ValueError("library came back empty, check the name")
-            with io.open(path, "w", encoding="utf-8", newline="\n") as f:
-                f.write(text)
-            say(f"  downloaded {name}: {text.count(chr(10))} sets")
-            return path
-        except Exception as e:
-            say(f"  download attempt {attempt} for {name} failed: {type(e).__name__}: {e}")
-            if attempt < 3:
-                time.sleep(5)
-    return None
-
-libs = a.gmt or ["MSigDB_Hallmark_2020", "Reactome_Pathways_2024", "GO_Biological_Process_2025"]
-
 # ---------------------------------------------------------------- GSEA
-def lead_genes(s):
-    return [g for g in str(s).split(";") if g]
-
-allres, failed = [], []
+libs = list(LIBRARIES)
+allres = []
 for lib in libs:
     name = os.path.basename(lib).replace(".gmt", "")
     out_csv = f"{RES}/gsea_{name}.csv"
-    if os.path.exists(out_csv) and not a.force:
-        r = pd.read_csv(out_csv)
-        allres.append(r)
-        say(f"{name}: already done, {len(r)} sets (use --force to redo)")
-        continue
     path = get_gmt(lib)
-    if path is None:
-        failed.append(name)
-        say(f"{name}: SKIPPED, could not get the gene sets")
-        continue
-    try:
-        pre = gp.prerank(rnk=rk, gene_sets=path, min_size=15, max_size=500,
-                         permutation_num=a.nperm, seed=7, threads=4,
-                         outdir=None, verbose=False)
-    except Exception as e:
-        failed.append(name)
-        say(f"{name}: FAILED during GSEA: {type(e).__name__}: {e}")
-        continue
+    pre = gp.prerank(rnk=rk, gene_sets=path, min_size=15, max_size=500,
+                     permutation_num=a.nperm, seed=7, threads=a.threads,
+                     outdir=None, verbose=False)
     r = pre.res2d.copy()
     r.insert(0, "library", name)
     r.to_csv(out_csv, index=False)
     allres.append(r)
     fdr = r["FDR q-val"].astype(float)
-    say(f"{name}: {len(r)} sets tested, FDR<0.05: {int((fdr<0.05).sum())}, FDR<0.25: {int((fdr<0.25).sum())}")
+    say(f"{name}: {len(r)} sets tested, FDR<0.05: {int((fdr<0.05).sum())}")
     for i, t in enumerate(r.assign(f=fdr).sort_values("f").head(3)["Term"].tolist()):
         try:
             ax = pre.plot(terms=t, show_ranking=True, figsize=(5, 6))
             ax.savefig(f"{FIG}/gsea_{name}_top{i+1}.png", dpi=200, bbox_inches="tight")
             plt.close("all")
         except Exception as e:
-            say(f"  enrichment plot failed for {t}: {type(e).__name__}")
-
-if not allres:
-    say("No GSEA results at all. Nothing further to do.")
-    with io.open(f"{RES}/part4_summary.txt", "w", encoding="utf-8") as f:
-        f.write("\n".join(log_lines) + "\n")
-    sys.exit(1)
+            raise RuntimeError(f"Enrichment plot failed for {t}") from e
 
 G = pd.concat(allres, ignore_index=True)
 for c in ["NES", "NOM p-val", "FDR q-val"]:
@@ -147,11 +87,15 @@ def dotplot(d, title, path, n=10):
         return False
     d = d.copy()
     d["label"] = d["Term"].str.replace(r"\s*\(GO:\d+\)", "", regex=True).str.slice(0, 55)
-    d = pd.concat([d.nlargest(n, "NES"), d.nsmallest(n, "NES")]).drop_duplicates("label").sort_values("NES")
+    d = pd.concat([d[d.NES > 0].nlargest(n, "NES"), d[d.NES < 0].nsmallest(n, "NES")]).drop_duplicates("Term").sort_values("NES")
     fig, ax = plt.subplots(figsize=(8.5, 0.34 * len(d) + 1.8))
     sc = ax.scatter(d["NES"], d["label"], s=20 + 12 * d["n_lead"],
                     c=d["FDR q-val"], cmap="viridis_r", edgecolor="k", lw=.4)
     ax.axvline(0, c="grey", lw=.8)
+    lo, hi = d.NES.min(), d.NES.max()
+    pad = max(.35, .12*(hi-lo))
+    ax.set_xlim(min(0,lo)-pad,max(0,hi)+pad)
+    ax.margins(y=.06)
     ax.set_xlabel("NES (positive = higher in T2D)")
     ax.set_title(title, fontsize=10)
     fig.colorbar(sc, label="FDR q-value", shrink=.6)
@@ -159,11 +103,11 @@ def dotplot(d, title, path, n=10):
     return True
 
 for lib, d in G.groupby("library"):
-    sig = d[d["FDR q-val"] < 0.25]
-    note = ""
+    sig = d[d["FDR q-val"] < 0.05]
+    note = " (FDR < 0.05)"
     if sig.empty:  # fall back so slide 10 always gets a figure
         sig = d.reindex(d["NES"].abs().sort_values(ascending=False).index).head(20)
-        note = " (no set reached FDR 0.25; showing the largest NES)"
+        note = " (no set reached FDR 0.05; exploratory NES)"
     if dotplot(sig, f"GSEA {lib}: T2D vs ND{note}", f"{FIG}/dotplot_gsea_{lib}.png"):
         say(f"dot plot written for {lib}{note}")
 
@@ -179,12 +123,13 @@ if not a.skip_ora:
         for k, ids in sets.items():
             ids = ids.dropna().tolist()
             say(f"ORA {k}: {len(ids)} genes at raw p<{a.p_cut}")
-            if len(ids) < 5:
-                say(f"  too few genes, skipped")
+            if not ids:
+                say("  empty query, skipped")
                 continue
             r = gpf.profile(organism="hsapiens", query=ids, background=bg,
                             domain_scope="custom", sources=["GO:BP", "GO:MF", "GO:CC", "REAC"],
                             significance_threshold_method="g_SCS")
+            r.to_csv(f"{RES}/ora_gprofiler_{k}_query.csv", index=False)
             r.insert(0, "direction", k)
             ora.append(r)
             say(f"  {len(r)} significant terms")
@@ -192,19 +137,22 @@ if not a.skip_ora:
             O = pd.concat(ora, ignore_index=True)
             O["parents"] = O["parents"].astype(str)
             O.to_csv(f"{RES}/ora_gprofiler.csv", index=False)
+            for col in ("p_value", "intersection_size", "query_size", "term_size"):
+                O[col] = pd.to_numeric(O[col], errors="raise")
             O["gene_ratio"] = O["intersection_size"] / O["query_size"]
+            O.nsmallest(20, "p_value")[["direction", "source", "name", "term_size", "intersection_size", "p_value"]].to_csv(f"{RES}/ora_top20.csv", index=False)
             for k, d in O.groupby("direction"):
                 d = d.nsmallest(15, "p_value").sort_values("gene_ratio")
                 fig, ax = plt.subplots(figsize=(8.5, 0.34 * len(d) + 1.8))
                 sc = ax.scatter(d["gene_ratio"], d["name"].str.slice(0, 55),
                                 s=20 + 12 * d["intersection_size"],
-                                c=-np.log10(d["p_value"]), cmap="viridis", edgecolor="k", lw=.4)
+                                c=-np.log10(d["p_value"].clip(lower=np.finfo(float).tiny)), cmap="viridis", edgecolor="k", lw=.4)
                 ax.set_xlabel("gene ratio")
                 ax.set_title(f"g:Profiler ORA, genes {k} in T2D (exploratory, raw p<{a.p_cut})", fontsize=10)
                 fig.colorbar(sc, label="-log10 adjusted p", shrink=.6)
                 fig.tight_layout(); fig.savefig(f"{FIG}/dotplot_ora_{k}.png", dpi=200); plt.close(fig)
     except Exception as e:
-        say(f"g:Profiler step FAILED: {type(e).__name__}: {e}")
+        raise RuntimeError("g:Profiler did not complete; rerun in a fresh directory") from e
 
 # ---------------------------------------------------------------- checks for interpretation
 fad = ["TSPAN33", "NT5E", "TMED6", "PAK5"]   # PAK7 was renamed PAK5 by HGNC; Ensembl 110 uses PAK5
@@ -224,16 +172,15 @@ marker.to_csv(f"{RES}/marker_gene_ranks.csv", index=False)
 with io.open(f"{RES}/part4_summary.txt", "w", encoding="utf-8") as f:
     w = lambda s="": f.write(s + "\n")
     w("PART 4 SUMMARY"); w("=" * 70)
+    w(f"GSEA permutations: {a.nperm}; seed: 7; set size: 15-500")
     for s in log_lines:
         w(s)
-    if failed:
-        w(); w("LIBRARIES THAT FAILED: " + ", ".join(failed))
     for lib, d in G.groupby("library"):
         w(); w("=" * 70); w(f"LIBRARY: {lib}")
         fdr = d["FDR q-val"]
-        w(f"sets tested {len(d)} | FDR<0.05 {int((fdr<0.05).sum())} | FDR<0.25 {int((fdr<0.25).sum())}")
-        for lab, dd in (("TOP UP in T2D", d.nlargest(12, "NES")),
-                        ("TOP DOWN in T2D", d.nsmallest(12, "NES"))):
+        w(f"sets tested {len(d)} | FDR<0.05 {int((fdr<0.05).sum())}")
+        for lab, dd in (("TOP UP in T2D (ranked by NES; see FDR)", d[d.NES > 0].nlargest(12, "NES")),
+                        ("TOP DOWN in T2D (ranked by NES; see FDR)", d[d.NES < 0].nsmallest(12, "NES"))):
             w(); w(lab + "   (stress_frac = share of leading-edge genes that are Part 2 stress genes)")
             w(f"{'NES':>6} {'FDRq':>9} {'nLead':>6} {'strFr':>6}  Term")
             for _, r in dd.iterrows():
@@ -252,4 +199,4 @@ with io.open(f"{RES}/part4_summary.txt", "w", encoding="utf-8") as f:
             w(f"  {d_}/{fn}")
 
 say("")
-say("done. Summary saved to results/part4_summary.txt.")
+say(f"Done. Summary saved to {RES}/part4_summary.txt.")

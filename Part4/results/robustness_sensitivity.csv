@@ -10,8 +10,8 @@ raised in T2D,Reactome,Collagen Degradation,2.223,0.0,1.588,0.0495,stays signifi
 reduced in T2D,Reactome,tRNA Processing in the Mitochondrion,-3.056,0.0,-1.91,0.038,stays significant
 reduced in T2D,Reactome,rRNA Processing in the Mitochondrion,-2.922,0.0,-1.852,0.0459,stays significant
 reduced in T2D,Reactome,Mitochondrial RNA Degradation,-2.232,0.0051,-1.45,0.1855,loses significance
-reduced in T2D,Reactome,Regulation of Insulin Secretion,-0.954,0.7488,-1.885,0.0415,gains significance
-reduced in T2D,GO:BP,Regulation of Insulin Secretion (GO:0050796),1.29,0.317,-2.065,0.0333,gains significance
-reduced in T2D,GO:BP,Insulin Secretion (GO:0030073),-1.896,0.0981,-0.944,0.7229,not significant in either
-reduced in T2D,GO:BP,Mitochondrial Translation (GO:0032543),1.021,0.7099,2.002,0.0059,gains significance
-reduced in T2D,MSigDB Hallmark,Pancreas Beta Cells (single-set test),-1.798,,-1.755,,stable (nominal p 0.0008 -> 0.0012)
+exploratory,Reactome,Regulation of Insulin Secretion,-0.954,0.7488,-1.885,0.0415,gains significance
+exploratory,GO:BP,Regulation of Insulin Secretion (GO:0050796),1.29,0.317,-2.065,0.0333,gains significance
+exploratory,GO:BP,Insulin Secretion (GO:0030073),-1.896,0.0981,-0.944,0.7229,not significant in either
+exploratory,GO:BP,Mitochondrial Translation (GO:0032543),1.021,0.7099,2.002,0.0059,gains significance
+reduced in T2D,MSigDB Hallmark,Pancreas Beta Cells,-1.789,0.0039,-1.76,0.004,stays significant

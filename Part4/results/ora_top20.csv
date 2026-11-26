@@ -2,18 +2,18 @@ direction,source,name,term_size,intersection_size,p_value
 up,GO:BP,response to hypoxia,249,28,1.3612692911344708e-12
 up,GO:BP,tube development,931,51,3.750920863443447e-12
 up,GO:BP,response to decreased oxygen levels,260,28,4.263226276928327e-12
-up,GO:BP,response to oxygen levels,284,29,4.927984631459823e-12
-up,GO:BP,circulatory system development,969,51,1.936748496996389e-11
-up,GO:BP,positive regulation of developmental process,1098,53,1.709481538444009e-10
-up,GO:BP,animal organ development,2353,82,1.8548520037905714e-10
+up,GO:BP,response to oxygen levels,284,29,4.9279846314598226e-12
+up,GO:BP,circulatory system development,969,51,1.9367484969963888e-11
+up,GO:BP,positive regulation of developmental process,1098,53,1.7094815384440089e-10
+up,GO:BP,animal organ development,2353,82,1.8548520037905716e-10
 up,GO:BP,vasculature development,661,40,4.857895918785165e-10
 up,GO:BP,cellular response to hypoxia,123,19,5.926893593671234e-10
 up,GO:BP,cellular response to oxygen levels,145,20,1.09466291385507e-09
-up,GO:BP,cellular response to decreased oxygen levels,131,19,1.9474730464529617e-09
+up,GO:BP,cellular response to decreased oxygen levels,131,19,1.9474730464529613e-09
 up,GO:BP,blood vessel morphogenesis,544,35,4.4879674905629915e-09
-up,GO:BP,blood vessel development,631,37,1.4133531412975761e-08
+up,GO:BP,blood vessel development,631,37,1.413353141297576e-08
 up,GO:BP,tube morphogenesis,752,40,3.1978803477294944e-08
-up,GO:BP,system development,3286,95,5.879188845235725e-08
+up,GO:BP,system development,3286,95,5.8791888452357256e-08
 up,GO:BP,response to abiotic stimulus,933,44,1.1940795660719012e-07
 up,GO:BP,muscle structure development,544,33,1.223599300985236e-07
 up,GO:BP,tissue development,1588,59,3.08102095851676e-07

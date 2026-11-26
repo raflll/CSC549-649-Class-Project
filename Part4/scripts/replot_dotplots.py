@@ -24,15 +24,15 @@ if "n_lead" not in G.columns:
 G = G.dropna(subset=["NES", "FDR q-val"])
 
 for lib, d in G.groupby("library"):
-    sig = d[d["FDR q-val"] < 0.25]
-    note = ""
+    sig = d[d["FDR q-val"] < 0.05]
+    note = " (FDR < 0.05)"
     if sig.empty:
         sig = d.reindex(d["NES"].abs().sort_values(ascending=False).index).head(20)
-        note = " (no set reached FDR 0.25; showing the largest NES)"
+        note = " (no set reached FDR 0.05; exploratory NES)"
     sig = sig.copy()
     sig["label"] = sig["Term"].astype(str).str.replace(r"\s*\(GO:\d+\)", "", regex=True).str.slice(0, 55)
-    sel = pd.concat([sig.nlargest(10, "NES"), sig.nsmallest(10, "NES")]
-                    ).drop_duplicates("label").sort_values("NES")
+    sel = pd.concat([sig[sig.NES > 0].nlargest(10, "NES"), sig[sig.NES < 0].nsmallest(10, "NES")]
+                    ).drop_duplicates("Term").sort_values("NES")
     if sel.empty:
         continue
     fig, ax = plt.subplots(figsize=(8.5, 0.34 * len(sel) + 1.8))
@@ -41,8 +41,8 @@ for lib, d in G.groupby("library"):
     ax.axvline(0, c="grey", lw=.8)
     lo, hi = sel["NES"].min(), sel["NES"].max()
     pad = max(0.35, 0.12 * (hi - lo))          # keep the largest circles off the spines
-    ax.set_xlim(lo - pad, hi + pad)
-    ax.margins(y=0.04)
+    ax.set_xlim(min(0,lo) - pad, max(0,hi) + pad)
+    ax.margins(y=0.08)
     ax.set_xlabel("NES (positive = higher in T2D)")
     ax.set_title(f"GSEA {lib}: T2D vs ND{note}", fontsize=10)
     fig.colorbar(sc, label="FDR q-value", shrink=.6)

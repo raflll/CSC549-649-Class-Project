@@ -30,39 +30,60 @@ report, including what was checked and what was corrected, is in `AUDIT.md`.
 | `figures/gsea_*_top1-3.png` | enrichment plots for the three most significant sets per library |
 | `figures/dotplot_ora_up.png` | g:Profiler dot plot, genes higher in T2D |
 | `figures/robustness_sensitivity.png` | selected gene sets, 16 donors against 14 |
-| `figures/donor_influence.png` | donor influence: leave-one-out and matched two-donor exclusions |
+| `figures/donor_influence.png` | donor influence: archived overview of leave-one-out and same-size two-donor exclusions |
 | `figures/fig1_hallmark_report.png` | Hallmark enrichment dot plot for the report and presentation |
 | `figures/fig2_donor_report.png` | four fixed gene sets across 21 refits |
 | `scripts/part4_pathways_v2.py` | main analysis: ranking, GSEA, g:Profiler, marker checks |
-| `scripts/fix_ora_plot.py` | redraws the g:Profiler figure from the saved table |
+| `scripts/fix_ora_plot.py` | redraws the g:Profiler figure and top-20 table from archived results |
 | `scripts/replot_dotplots.py` | redraws the GSEA dot plots with corrected axis margins |
-| `scripts/part4_robustness.py` | 14-donor sensitivity analysis, writes to `results_noP7P8/` |
+| `scripts/part4_robustness.py` | full-library sensitivity analysis, both rankings at 1,000 permutations |
 | `scripts/part4_donor_influence.py` | 21 DESeq2 refits for the donor influence analysis |
-| `scripts/make_report_figures.py` | regenerate the two report figures from saved results |
+| `scripts/make_report_figures.py` | regenerate the report figures and selected sensitivity plot from saved results |
+| `scripts/pathway_utils.py` | shared ranking, GMT validation and fresh output-directory helpers |
+| `scripts/check_results.py` | offline checks of archived inputs and outputs |
 | `requirements.txt` | pinned dependency versions |
 | `GENESETS.md` | gene-set source URLs, versions and checksums |
 | `AUDIT.md` | what was verified, what was corrected, what is a known limitation |
 
 ## Run
 
-From this folder (reads `../Part2_statistics/results/de_results.csv`):
+From this folder, install dependencies and verify the archived outputs:
 
     python3 -m pip install -r requirements.txt
-    python3 scripts/part4_pathways_v2.py        # main analysis, 16 donors
-    python3 scripts/fix_ora_plot.py             # g:Profiler figure
-    python3 scripts/replot_dotplots.py          # GSEA dot plots
-    python3 scripts/part4_robustness.py         # 14-donor sensitivity
-    python3 scripts/part4_donor_influence.py    # 21 refits, ~20 min, needs pydeseq2
-    python3 scripts/make_report_figures.py      # report figures from saved results
+    python3 scripts/check_results.py
 
-Needs internet: gene sets are downloaded from Enrichr and cached in `genesets/` (not committed),
-and g:Profiler is queried over its API. A library whose `results/gsea_<name>.csv` already exists
-is skipped; use `--force` to redo it.
+To redraw figures from the archived results (no internet needed):
+
+    python3 scripts/fix_ora_plot.py
+    python3 scripts/replot_dotplots.py
+    python3 scripts/make_report_figures.py
+
+To repeat the analysis, run these separately:
+
+    python3 scripts/part4_pathways_v2.py
+    python3 scripts/part4_robustness.py
+    python3 scripts/part4_donor_influence.py
+
+The primary run writes to `reruns/primary/`; the 1,000-permutation sensitivity run to
+`reruns/sensitivity/`; and the 21-refit donor analysis to `reruns/donor_influence/`.
+The sensitivity script uses the archived 14-donor DE table by default; use `--de14
+reruns/donor_influence/de_results_noP7P8.csv` to use a new refit. All scripts require
+fresh output directories (use `--output-dir` to choose another). None silently reuses
+previous enrichment results. The donor refits can be expensive. The stored result files
+are the original analysis; compare reruns before replacing them. PyDESeq2 refits are an
+approximate cross-check of the R DESeq2 model, not an identical implementation.
+
+The gene-set files must match the documented version and checksum prefix in `GENESETS.md`.
+The script downloads them if absent and stops if a version differs. g:Profiler queries the
+live API, so future versions may return different results. The 2,000-permutation fixed-set
+NES calculation is distinct from full-library GSEA. Its corrected nominal p-value
+calculation uses the same-sign null; the archived nominal p columns are historical and are
+not used to support the conclusions.
 
 ## Software
 
 Python 3.14.0, gseapy 1.3.2, gprofiler-official 1.0.0, pandas 3.1.1, numpy 2.5.5,
-scipy 1.18.1, matplotlib 3.11.2. The audit reproduction additionally used pydeseq2 0.7.0.
+scipy 1.18.1, matplotlib 3.11.2. The original audit reproduction reported pydeseq2 0.7.0 (now pinned).
 
 Gene sets: MSigDB Hallmark 2020, Reactome Pathways 2024 and GO Biological Process 2025 via
 Enrichr; GO:BP, GO:MF, GO:CC and Reactome via the g:Profiler API.

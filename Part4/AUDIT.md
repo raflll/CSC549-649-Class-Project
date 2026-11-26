@@ -1,6 +1,6 @@
 # Part 4: audit and validation report
 
-Independent re-execution from the raw count matrix and the stored Part 4 outputs.
+Record of the original analysis checks and the subsequent repository review. Original execution claims below refer to the archived run, not a new execution of the corrected scripts.
 Last updated 26 November 2026.
 
 ## Inputs, verified by checksum
@@ -9,12 +9,12 @@ Last updated 26 November 2026.
 |------|----------|------|
 | `Part1_data_pipeline/gene_count_matrix.csv` | 62,754 genes x 16 donors | re-analysed from here |
 | `Part2_statistics/results/de_results.csv` | md5 `adb69afe...` | identical to the repository archive copy |
-| `Part4/scripts/part4_pathways_v2.py` | md5 `9e70cbc6...` | matches the script as written |
+| `Part4/scripts/part4_pathways_v2.py` | sha256 `3ec89a16559a8417fd3b604a8be59b281b0b6b3a926895410bab1d4f33fdc744` | corrected script; full rerun pending |
 | `genesets/MSigDB_Hallmark_2020.gmt` | sha256 `42755929...`, 50 sets, sizes 32-200 | `Pancreas Beta Cells` = the 40 genes listed on gsea-msigdb.org; `Hypoxia` = 200 genes |
 | `genesets/Reactome_Pathways_2024.gmt` | sha256 `1a7c43cb...`, 2,104 sets | see `GENESETS.md` |
 | `genesets/GO_Biological_Process_2025.gmt` | sha256 `0fc02458...`, 5,342 sets | see `GENESETS.md` |
 
-The working folder is not a git clone, so no commit hash is recorded.
+The reviewed source was a repository ZIP snapshot; no commit hash is embedded in the archive.
 
 ## 1. Validation table
 
@@ -39,7 +39,7 @@ The working folder is not a git clone, so no commit hash is recorded.
 | Correction method labelling | Checked g:Profiler parameters | `significance_threshold_method="g_SCS"`, g:Profiler's own graph-structure correction, not Benjamini-Hochberg FDR | CORRECTED AND RETESTED |
 | GSEA FDR threshold | Checked the official GSEA User Guide | the guide states that with a small number of samples gene_set permutation gives a less stringent significance assessment and that one should then use a more stringent FDR cutoff, such as 5%. We used 5%. The guide also recommends 1,000 permutations for either permutation type | VERIFIED AND CORRECT |
 | Permutation choice | Official GSEA User Guide, plus the design | gene-label permutation ignores gene-gene correlation. 8 donors per group meets the general sample-size recommendation for phenotype permutation, but phenotype permutation shuffles sample labels without preserving the batch and sex structure the design adjusts for, so ranking by the covariate-adjusted Wald statistic is the defensible trade | ACCEPTABLE SCIENTIFIC LIMITATION, now documented with both sides |
-| Power versus donor effect | 21 DESeq2 refits: baseline, 16 leave-one-out, 4 two-donor exclusions, identical NES computation (weighted KS, 2,000 gene-label permutations) throughout | hypoxia NES 2.31 baseline, 1.19 without P7/P8, 2.19-2.39 for three matched pairs; mean log2FC falls 88% against no fall for those pairs. ECM shows the same direction more weakly (NES 2.35 to 1.62, log2FC -43%). Beta-cell NES negative in all 21 refits, -0.98 to -2.42, with P7/P8 inside the range of the other 20 | CORRECTED AND RETESTED. Three comparison pairs were tested, not all 28 |
+| Power versus donor effect | 21 DESeq2 refits: baseline, 16 leave-one-out, 4 two-donor exclusions, identical NES computation (weighted KS, 2,000 gene-label permutations) throughout | hypoxia NES 2.31 baseline, 1.19 without P7/P8, 2.19-2.39 for three matched pairs; mean log2FC falls 88% against no fall for those pairs. ECM shows the same direction more weakly (NES 2.35 to 1.62, log2FC -43%). Beta-cell NES negative in all 21 refits, -0.98 to -2.42, with P7/P8 inside the range of the other 20 | CORRECTED AND RETESTED. Three comparison pairs were tested, not all 28. All three are in batch A; P7/P8 are in batch B |
 | "Every raised pathway loses significance" | Full-library comparison in all three libraries | FALSE. In Hallmark, 14 of 26 lose, 12 keep, 15 gain. TNF-alpha, EMT and Inflammatory Response keep significance at 14-donor NES 2.18, 2.30 and 1.50 respectively | CORRECTED AND RETESTED |
 | Stability of the 14-donor fit | Counted NES sign changes library-wide | 18/50 Hallmark, 532/1,257 Reactome, 992/2,305 GO:BP change sign; significant-set counts move in opposite directions (GO:BP 182 to 62, Reactome 127 to 249) | ACCEPTABLE SCIENTIFIC LIMITATION, now documented and used to justify preferring the fixed-set comparison |
 | Model identifiability after exclusion | Checked batch x group | batch B has 0 T2D donors after exclusion; group effect rests on batch A | ACCEPTABLE SCIENTIFIC LIMITATION, stated in every document |
@@ -47,7 +47,7 @@ The working folder is not a git clone, so no commit hash is recorded.
 | Figures match their tables | Re-plotted from the result CSVs and inspected the rendered images | no clipped dots, labels or legends; axis, colour and size mappings correct | CORRECTED AND RETESTED |
 | Literature supports each claim | Fetched each source; checked species and material | Olsson 2011 human islets (direct match); Hunter and Stein 2017 review; Haythorne 2019 mouse model and INS-1 rat line (direction only); Negi 2012 human islets; Fadista 2014 human islets, our own source cohort | CORRECTED AND RETESTED: species and material now stated |
 | Fadista agreement is not replication | Checked donor provenance | our 16 donors are a subset of their 89 | CORRECTED AND RETESTED |
-| Reproducibility on a fresh clone | requirements.txt, GENESETS.md with URLs and checksums, relative paths, no shell calls | documented in README | VERIFIED AND CORRECT |
+| Reproducibility on a fresh clone | dependencies, GMT checks and fresh output directories added | documented in README | Full corrected pipeline rerun pending |
 | Report page limit | Rendered to PDF and counted pages | see README of this audit section | CORRECTED AND RETESTED |
 
 ## 2. Retracted or corrected claims
@@ -59,7 +59,7 @@ The working folder is not a git clone, so no commit hash is recorded.
 | g:Profiler is an "independent" check | CORRECTED | second method, same donors and same DESeq2 output |
 | Beta-cell signal "five orders of magnitude stronger" | RETRACTED | from a 30-gene set assembled after seeing the results. On the MSigDB set it is essentially unchanged: NES -1.798 to -1.755 |
 | "Every raised pathway loses significance" | RETRACTED | true for hypoxia, glycolysis and matrix sets; false for TNF-alpha, EMT and inflammatory response, which keep significance |
-| "The stress signature collapses, proving an artifact" | CORRECTED | it is specifically attributable to two donors, shown against matched exclusions and on gene-level effect size. Donor attribution is not the same as proof of a technical artifact |
+| "The stress signature collapses, proving an artifact" | CORRECTED | hypoxia is sensitive to P7/P8 exclusion; same-size comparison pairs are from batch A, unlike P7/P8 from batch B. Donor and batch effects cannot be separated cleanly, and isolation stress is not proven |
 | Seven beta-cell genes "in the bottom 2%" | WITHDRAWN AS CIRCULAR | those genes were selected by Part 2 for trending down. Replaced by the 40-gene MSigDB set |
 | "Agrees with Fadista" | CORRECTED | our donors are a subset of theirs; this is a re-analysis |
 | "These genes don't differ" | CORRECTED | "were not significantly differentially expressed" |
@@ -69,21 +69,11 @@ The working folder is not a git clone, so no commit hash is recorded.
 Nothing material. Two items are bounded rather than open:
 
 - The 14-donor Hallmark comparison was run at 1,000 permutations, not 10,000, because the audit machine cannot hold the 10,000-permutation matrix. The 16-donor run at both settings agrees to r = 0.99996 with zero changes in significance class, so the effect on conclusions is negligible. Both rankings in the comparison used identical settings.
-- Part 3 does not exist, so no promoter or non-coding comparison was possible.
+- Part 3 is now present in `../Part3_promoters_ncrna/`. Its 20/22 negative mitochondrial tRNA fold changes agree in direction with the mitochondrial RNA-processing enrichment, subject to shared data and poly-A selection limitations.
 
 ## 4. Reproducing this
 
-```
-cd Part4
-python3 -m pip install -r requirements.txt
-python3 scripts/part4_pathways_v2.py        # main analysis, 16 donors
-python3 scripts/fix_ora_plot.py             # g:Profiler figure
-python3 scripts/replot_dotplots.py          # dot plots
-python3 scripts/part4_robustness.py         # 14-donor sensitivity
-python3 scripts/part4_donor_influence.py    # 21 refits, donor influence  (needs pydeseq2)
-python3 scripts/make_report_figures.py      # regenerate report figures
-```
-Seeds are 7 throughout. Gene-set provenance, URLs and checksums are in `GENESETS.md`.
+See `README.md` for the corrected commands. Reruns write into `reruns/` rather than overwriting archived results. The former manually assembled beta-cell rank test is removed from the pipeline; the selected sensitivity table uses the full-library Hallmark beta-cell result. The fixed-set rerun computes its nominal p-values against the same-sign permutation null; archived nominal p-values used the total permutation count and are retained as historical outputs, not used for the conclusions. The reported NES comparisons are not claimed to be newly re-executed.
 
 ## 5. Final pre-submission checks
 
@@ -107,3 +97,11 @@ of the weaker gene-label null. The GSEA User Guide states that gene_set permutat
 stringent significance assessment with few samples and that a 5% FDR cutoff should then be used,
 which is the cutoff applied throughout. This paragraph was cut from the report body to meet the
 2-3 page limit; the reasoning is recorded here.
+
+## Repository cleanup and offline verification (26 November 2026)
+
+The updated scripts remove the obsolete hand-picked rank test, use matched 1,000-permutation library comparisons, convert ORA numeric columns before plotting, and refuse stale output directories. The gene-set loader checks the archived SHA-256 prefixes and set counts. PyDESeq2 is now included in the dependency list. The three archived dot plots were redrawn at FDR < 0.05; the selected sensitivity figure uses the full-library beta-cell row rather than the older single-set test.
+
+`python scripts/check_results.py` passed against the repository snapshot: 19,072 tested genes, 17,358 ranked genes, 6 DE genes, 274/32 ORA queries, identical original/repeat 94-term ORA tables, no down-query terms, matching individual/combined GSEA tables (26/125/173 significant sets), matching Hallmark sensitivity classifications (14 lost, 12 kept, 15 gained, 18 sign flips), and 21 stored refits with negative beta-cell NES. All Python files parsed. All three offline plotting scripts executed.
+
+The exact GMT files and the GSEApy, g:Profiler and PyDESeq2 packages were unavailable in the review environment; the corrected full analysis has not been re-executed. Stored primary results and donor refits were retained. The revised sensitivity script can recreate the comparison tables from the archived 16/14-donor DE tables; the 14-donor input is itself an archived fit and can be regenerated with the donor-influence script. Future live g:Profiler results may change with the database.

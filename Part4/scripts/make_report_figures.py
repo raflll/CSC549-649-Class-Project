@@ -10,7 +10,7 @@ plt.rcParams.update({"font.size":13,"font.family":"DejaVu Sans",
 import os
 R=os.path.join(os.path.dirname(os.path.abspath(__file__)),"..","results")
 H=os.path.join(R,"gsea_MSigDB_Hallmark_2020.csv")
-rows=[r for r in csv.DictReader(open(H)) if float(r["FDR q-val"])<0.05]
+rows=[r for r in csv.DictReader(open(H, encoding="utf-8", newline="")) if float(r["FDR q-val"])<0.05]
 for r in rows:
     r["NES"]=float(r["NES"]); r["FDR"]=float(r["FDR q-val"])
     r["lead"]=len(r["Lead_genes"].split(";"))
@@ -36,7 +36,7 @@ for s in ("top","right"): ax.spines[s].set_visible(False)
 fig.tight_layout(); fig.savefig(os.path.join(os.path.dirname(os.path.abspath(__file__)),"..","figures","fig1_hallmark_report.png"),dpi=200,bbox_inches="tight"); plt.close(fig)
 
 # ---------- Figure 2: donor influence ----------
-D=list(csv.DictReader(open(os.path.join(R,"donor_influence.csv"))))
+D=list(csv.DictReader(open(os.path.join(R,"donor_influence.csv"), encoding="utf-8", newline="")))
 sets=[("HALLMARK_PANCREAS_BETA_CELLS","Pancreas beta cells\n(Hallmark)"),
       ("Reactome_tRNA_Processing_Mitochondrion","tRNA processing in the\nmitochondrion (Reactome)"),
       ("GO_Cellular_Response_to_Hypoxia","Cellular response to\nhypoxia (GO:0071456)"),
@@ -71,3 +71,19 @@ fig.suptitle("Donor influence on four fixed gene sets across 21 DESeq2 refits",f
 fig.tight_layout(rect=[0,0.07,1,0.97])
 fig.savefig(os.path.join(os.path.dirname(os.path.abspath(__file__)),"..","figures","fig2_donor_report.png"),dpi=200,bbox_inches="tight"); plt.close(fig)
 print("done")
+
+# Selected matched-cohort comparison (both rankings: 1,000 permutations).
+S = list(csv.DictReader(open(os.path.join(R, "robustness_sensitivity.csv"), encoding="utf-8", newline="")))
+fig, ax = plt.subplots(figsize=(10, .38 * len(S) + 2))
+labels = [r["gene_set"] + " [" + r["library"] + "]" for r in S]
+for i, r in enumerate(S):
+    a, b = float(r["NES_16donors"]), float(r["NES_14donors"])
+    ax.plot([a,b], [i,i], color="0.65", lw=1)
+    ax.scatter(a,i,c="#1f77b4",s=40,zorder=3)
+    ax.scatter(b,i,c="#d62728",marker="D",s=40,zorder=3)
+ax.set_yticks(range(len(S)), labels, fontsize=10)
+ax.invert_yaxis(); ax.axvline(0,color="0.5",lw=.8)
+ax.set_xlabel("Normalised enrichment score (NES)")
+ax.set_title("Selected gene sets: 16 versus 14 donors (1,000 permutations each)", fontsize=12)
+ax.legend(handles=[Line2D([],[],marker="o",ls="",color="#1f77b4",label="16 donors"), Line2D([],[],marker="D",ls="",color="#d62728",label="Without P7/P8")], loc="lower right", fontsize=10)
+fig.tight_layout(); fig.savefig(os.path.join(R,"..","figures","robustness_sensitivity.png"),dpi=200,bbox_inches="tight"); plt.close(fig)

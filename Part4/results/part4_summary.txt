@@ -1,19 +1,19 @@
-PART 4 SUMMARY
+PART 4 SUMMARY (archived main results; 10,000 permutations)
 ======================================================================
 ranked genes: 17358 of 19072 tested (1687 have no symbol, 27 duplicate symbols)
-MSigDB_Hallmark_2020: already done, 50 sets (use --force to redo)
+MSigDB_Hallmark_2020: already done, 50 sets (archived main run)
   downloaded Reactome_Pathways_2024: 2104 sets
 Reactome_Pathways_2024: 1257 sets tested, FDR<0.05: 125, FDR<0.25: 264
   downloaded GO_Biological_Process_2025: 5342 sets
 GO_Biological_Process_2025: 2305 sets tested, FDR<0.05: 173, FDR<0.25: 597
-dot plot written for GO_Biological_Process_2025
-dot plot written for MSigDB_Hallmark_2020
-dot plot written for Reactome_Pathways_2024
+dot plot regenerated for GO_Biological_Process_2025 (FDR < 0.05)
+dot plot regenerated for MSigDB_Hallmark_2020 (FDR < 0.05)
+dot plot regenerated for Reactome_Pathways_2024 (FDR < 0.05)
 ORA up: 274 genes at raw p<0.01
   94 significant terms
 ORA down: 32 genes at raw p<0.01
   0 significant terms
-g:Profiler step FAILED: TypeError: Column 'p_value' has dtype object, cannot use method 'nsmallest' with this dtype
+Original ORA plot failed after saving the valid table (p_value stored as text). The plot was regenerated from that table; both live ORA queries were subsequently verified. Main script now converts numeric columns before plotting.
 
 ======================================================================
 LIBRARY: GO_Biological_Process_2025

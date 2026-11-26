@@ -1,0 +1,10 @@
+genesets/
+reruns/
+results_noP7P8/
+figures_noP7P8/
+_to_delete/
+__pycache__/
+*.pyc
+*.docx
+*.pdf
+*.zip

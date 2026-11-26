@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 """Draw the g:Profiler dot plot from results/ora_gprofiler.csv.
 
-The main script saved the table but crashed on the figure, because g:Profiler
-returned p_value as text rather than numbers. This reads the saved table,
-converts the numeric columns properly, and writes the plots.
+Recreate the figure and top-20 table from the archived ORA results without a live query.
 
 Run from the Part4 folder:   python3 scripts/fix_ora_plot.py
 """
