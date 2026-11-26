@@ -1,0 +1,4 @@
+library,sets,sig16,sig14,lose,stay,gain,sign_flips,median_abs_NES_16,median_abs_NES_14
+MSigDB Hallmark,50,26,27,14,12,15,18,1.402,1.421
+Reactome,1257,127,249,92,35,214,532,1.043,1.177
+GO:BP,2305,182,62,175,7,55,992,1.131,1.084

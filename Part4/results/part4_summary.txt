@@ -1,0 +1,189 @@
+PART 4 SUMMARY
+======================================================================
+ranked genes: 17358 of 19072 tested (1687 have no symbol, 27 duplicate symbols)
+MSigDB_Hallmark_2020: already done, 50 sets (use --force to redo)
+  downloaded Reactome_Pathways_2024: 2104 sets
+Reactome_Pathways_2024: 1257 sets tested, FDR<0.05: 125, FDR<0.25: 264
+  downloaded GO_Biological_Process_2025: 5342 sets
+GO_Biological_Process_2025: 2305 sets tested, FDR<0.05: 173, FDR<0.25: 597
+dot plot written for GO_Biological_Process_2025
+dot plot written for MSigDB_Hallmark_2020
+dot plot written for Reactome_Pathways_2024
+ORA up: 274 genes at raw p<0.01
+  94 significant terms
+ORA down: 32 genes at raw p<0.01
+  0 significant terms
+g:Profiler step FAILED: TypeError: Column 'p_value' has dtype object, cannot use method 'nsmallest' with this dtype
+
+======================================================================
+LIBRARY: GO_Biological_Process_2025
+sets tested 2305 | FDR<0.05 173 | FDR<0.25 597
+
+TOP UP in T2D   (stress_frac = share of leading-edge genes that are Part 2 stress genes)
+   NES      FDRq  nLead  strFr  Term
+  2.35    0.0000     76   0.03  Extracellular Matrix Organization (GO:0030198)
+  2.32    0.0000     47   0.00  Extracellular Structure Organization (GO:0043062)
+  2.29    0.0000     30   0.03  Cellular Response to Hypoxia (GO:0071456)
+  2.28    0.0000     46   0.00  External Encapsulating Structure Organization (GO:0045229)
+  2.28    0.0000     30   0.03  Cellular Response to Decreased Oxygen Levels (GO:0036294)
+  2.13    0.0012     24   0.08  Collagen Fibril Organization (GO:0030199)
+  2.10    0.0015     23   0.00  Positive Regulation of Fat Cell Differentiation (GO:004560
+  2.09    0.0017     57   0.00  Cytoplasmic Translation (GO:0002181)
+  2.08    0.0017     18   0.06  Regulation of Smooth Muscle Cell Proliferation (GO:0048660
+  2.08    0.0015     15   0.00  Lung Development (GO:0030324)
+  2.07    0.0017     21   0.00  Endothelial Cell Migration (GO:0043542)
+  2.06    0.0022     22   0.00  Anterior/Posterior Pattern Specification (GO:0009952)
+
+TOP DOWN in T2D   (stress_frac = share of leading-edge genes that are Part 2 stress genes)
+   NES      FDRq  nLead  strFr  Term
+ -2.07    0.3212     13   0.00  Positive Regulation of Telomere Maintenance via Telomere L
+ -2.07    0.1618     15   0.00  Sister Chromatid Segregation (GO:0000819)
+ -2.03    0.1519     12   0.00  Vesicle Cytoskeletal Trafficking (GO:0099518)
+ -2.01    0.1381      8   0.00  Alpha-Amino Acid Catabolic Process (GO:1901606)
+ -1.98    0.1407     42   0.00  Protein Modification by Small Protein Removal (GO:0070646)
+ -1.98    0.1232     36   0.00  Protein Deubiquitination (GO:0016579)
+ -1.97    0.1141      9   0.00  Axoneme Assembly (GO:0035082)
+ -1.96    0.1078     14   0.00  Phosphatidylinositol-Mediated Signaling (GO:0048015)
+ -1.94    0.1165     11   0.00  Positive Regulation of Telomere Maintenance via Telomerase
+ -1.93    0.1119     20   0.00  Phosphatidylinositol Phosphate Biosynthetic Process (GO:00
+ -1.92    0.1051     10   0.00  Positive Regulation of Translational Initiation (GO:004594
+ -1.91    0.1075      6   0.00  Regulation of Sodium Ion Transmembrane Transport (GO:19023
+
+======================================================================
+LIBRARY: MSigDB_Hallmark_2020
+sets tested 50 | FDR<0.05 26 | FDR<0.25 32
+
+TOP UP in T2D   (stress_frac = share of leading-edge genes that are Part 2 stress genes)
+   NES      FDRq  nLead  strFr  Term
+  2.72    0.0000    113   0.04  Hypoxia
+  2.71    0.0000    113   0.01  TNF-alpha Signaling via NF-kB
+  2.64    0.0000    126   0.03  Epithelial Mesenchymal Transition
+  2.11    0.0000     86   0.00  Inflammatory Response
+  2.10    0.0000     67   0.01  Myogenesis
+  1.98    0.0001     70   0.07  Glycolysis
+  1.95    0.0001     25   0.00  TGF-beta Signaling
+  1.94    0.0001     39   0.00  IL-6/JAK/STAT3 Signaling
+  1.91    0.0002     82   0.00  Apical Junction
+  1.77    0.0009     70   0.06  KRAS Signaling Up
+  1.77    0.0009     55   0.00  Apoptosis
+  1.74    0.0011     62   0.00  Allograft Rejection
+
+TOP DOWN in T2D   (stress_frac = share of leading-edge genes that are Part 2 stress genes)
+   NES      FDRq  nLead  strFr  Term
+ -2.13    0.0000     44   0.00  Protein Secretion
+ -1.91    0.0026     43   0.00  Spermatogenesis
+ -1.80    0.0042     12   0.00  Pancreas Beta Cells
+ -1.57    0.0204     29   0.00  Interferon Alpha Response
+ -1.38    0.0664     64   0.00  E2F Targets
+ -1.18    0.2366     43   0.00  Fatty Acid Metabolism
+ -1.10    0.3590     31   0.00  Pperoxisome
+ -1.10    0.3213     35   0.00  Androgen Response
+ -1.04    0.4384     46   0.00  heme Metabolism
+ -1.01    0.4870     27   0.00  Bile Acid Metabolism
+ -0.89    0.7436     50   0.00  G2-M Checkpoint
+  0.67    0.9678     36   0.00  KRAS Signaling Dn
+
+======================================================================
+LIBRARY: Reactome_Pathways_2024
+sets tested 1257 | FDR<0.05 125 | FDR<0.25 264
+
+TOP UP in T2D   (stress_frac = share of leading-edge genes that are Part 2 stress genes)
+   NES      FDRq  nLead  strFr  Term
+  2.46    0.0000     53   0.04  Collagen Formation
+  2.35    0.0000     39   0.03  Collagen Biosynthesis and Modifying Enzymes
+  2.33    0.0000     40   0.03  Assembly of Collagen Fibrils and Other Multimeric Structur
+  2.32    0.0000     71   0.00  Peptide Chain Elongation
+  2.31    0.0000     77   0.00  Eukaryotic Translation Elongation
+  2.30    0.0000    145   0.01  Extracellular Matrix Organization
+  2.27    0.0000     36   0.00  Collagen Degradation
+  2.27    0.0000     71   0.00  Nonsense Mediated Decay (NMD) Independent of the Exon Junc
+  2.26    0.0000     70   0.00  Eukaryotic Translation Termination
+  2.26    0.0000     69   0.00  Viral mRNA Translation
+  2.24    0.0000     74   0.00  Response of EIF2AK4 (GCN2) to Amino Acid Deficiency
+  2.23    0.0000     70   0.00  Selenocysteine Synthesis
+
+TOP DOWN in T2D   (stress_frac = share of leading-edge genes that are Part 2 stress genes)
+   NES      FDRq  nLead  strFr  Term
+ -3.12    0.0000     34   0.00  tRNA Processing in the Mitochondrion
+ -2.95    0.0000     23   0.00  rRNA Processing in the Mitochondrion
+ -2.37    0.0024     15   0.00  FASTK Family Proteins Regulate Processing and Stability of
+ -2.29    0.0051     12   0.00  Synthesis of PIPs at the Early Endosome Membrane
+ -2.27    0.0055     17   0.00  Impaired BRCA2 Binding to PALB2
+ -2.24    0.0060     17   0.00  E2F Mediated Regulation of DNA Replication
+ -2.21    0.0070     17   0.00  Mitochondrial RNA Degradation
+ -2.15    0.0117     53   0.00  tRNA Processing
+ -2.12    0.0138     11   0.00  NEP NS2 Interacts With the Cellular Export Machinery
+ -2.12    0.0125     11   0.00  Transport of Ribonucleoproteins Into the Host Nucleus
+ -2.08    0.0150     39   0.00  Amplification of Signal From the Kinetochores
+ -2.08    0.0150     39   0.00  Amplification of Signal From Unattached Kinetochores via a
+
+======================================================================
+FADISTA SILENCED GENES (TSPAN33, NT5E, TMED6, PAK7)
+ symbol    baseMean  log2FoldChange   pvalue     padj
+TSPAN33  692.777909       -1.011962 0.000003 0.018074
+   NT5E 1595.595287        0.856846 0.026027 0.656620
+  TMED6  655.464229       -0.626249 0.182671 0.845968
+not present in de_results.csv: PAK7
+
+======================================================================
+MARKER GENE RANKS  (rank 1 = most up in T2D, 17358 = most down)
+ symbol       set  rank  of_total  log2FoldChange       pvalue     padj
+    AK4    stress     1     17358        2.451184 7.392553e-09 0.000140
+    LOX    stress     2     17358        2.010180 2.855747e-06 0.018074
+ IGFBP3    stress     5     17358        2.145707 1.458773e-05 0.046163
+ LUCAT1    stress     4     17358        2.195444 1.341152e-05 0.046163
+ANGPTL4    stress   234     17358        2.630666 8.603465e-03 0.597165
+SLC16A3    stress   302     17358        2.935002 1.134059e-02 0.607781
+  GDF15    stress  1871     17358        1.817984 1.069821e-01 0.795570
+  THBS2    stress    13     17358        2.111333 9.971696e-05 0.124666
+  PLOD2    stress    16     17358        1.049904 1.176360e-04 0.124666
+   G0S2    stress    20     17358        3.165000 2.002221e-04 0.171155
+TMEM158    stress     6     17358        1.972231 1.875343e-05 0.050867
+  TREM1    stress     7     17358        2.502095 2.832197e-05 0.067219
+   HIC1    stress    22     17358        2.220244 2.234071e-04 0.171857
+ SLC2A2 beta_cell 17337     17358       -1.747690 6.852995e-03 0.573983
+RASGRP1 beta_cell 17299     17358       -0.912409 1.636182e-02 0.639588
+PPP1R1A beta_cell 17297     17358       -1.070238 1.683342e-02 0.643777
+  GLRA1 beta_cell 17251     17358       -1.307707 2.737435e-02 0.666355
+ CAPN13 beta_cell 17196     17358       -1.049063 3.962131e-02 0.722993
+   CHL1 beta_cell 17148     17358       -1.197120 5.075845e-02 0.744555
+   PDX1 beta_cell 17059     17358       -0.768368 6.972412e-02 0.765426
+   IAPP beta_cell 16178     17358       -0.961021 2.090127e-01 0.850792
+  ABCC8 beta_cell 16125     17358       -0.680872 2.154204e-01 0.850792
+SLC30A8 beta_cell 13932     17358       -0.332441 4.900160e-01 0.927281
+    INS beta_cell  1830     17358        1.222544 1.041345e-01 0.795570
+    GCG beta_cell 12434     17358       -0.230143 6.763701e-01 0.967253
+ TCF7L2 beta_cell  8628     17358        0.037818 8.535741e-01 0.984412
+   MAFA beta_cell  6462     17358        0.378459 5.688108e-01 0.948174
+ KCNJ11 beta_cell 10851     17358       -0.087241 8.607482e-01 0.985133
+
+======================================================================
+files written:
+  results/fadista_silenced_genes_check.csv
+  results/gsea_GO_Biological_Process_2025.csv
+  results/gsea_MSigDB_Hallmark_2020.csv
+  results/gsea_Reactome_Pathways_2024.csv
+  results/gsea_all.csv
+  results/marker_gene_ranks.csv
+  results/ora_gprofiler.csv
+  results/part4_summary.txt
+  results/ranked_list.csv
+  figures/dotplot_gsea_GO_Biological_Process_2025.png
+  figures/dotplot_gsea_MSigDB_Hallmark_2020.png
+  figures/dotplot_gsea_Reactome_Pathways_2024.png
+  figures/gsea_GO_Biological_Process_2025_top1.png
+  figures/gsea_GO_Biological_Process_2025_top2.png
+  figures/gsea_GO_Biological_Process_2025_top3.png
+  figures/gsea_MSigDB_Hallmark_2020_top1.png
+  figures/gsea_MSigDB_Hallmark_2020_top2.png
+  figures/gsea_MSigDB_Hallmark_2020_top3.png
+  figures/gsea_Reactome_Pathways_2024_top1.png
+  figures/gsea_Reactome_Pathways_2024_top2.png
+  figures/gsea_Reactome_Pathways_2024_top3.png
+
+======================================================================
+CORRECTION (26 Nov 2026, see AUDIT.md)
+The line above reporting PAK7 as absent is wrong. HGNC renamed PAK7 to PAK5, and the
+Ensembl 110 annotation uses PAK5. The gene WAS tested: log2FC -0.624, p 0.176, FDR 0.844.
+All four Fadista genes were therefore tested; only TSPAN33 differs (FDR 0.018).
+See results/fadista_silenced_genes_check.csv, which has been regenerated.

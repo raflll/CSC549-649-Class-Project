@@ -1,0 +1,17 @@
+theme,library,gene_set,NES_16donors,FDR_16donors,NES_14donors,FDR_14donors,verdict
+raised in T2D,GO:BP,Cellular Response to Hypoxia (GO:0071456),2.309,0.0,1.17,0.79,loses significance
+raised in T2D,GO:BP,Cellular Response to Decreased Oxygen Levels (GO:0036294),2.292,0.0,1.154,0.8101,loses significance
+raised in T2D,GO:BP,Extracellular Matrix Organization (GO:0030198),2.321,0.0,1.639,0.1854,loses significance
+raised in T2D,GO:BP,Collagen Fibril Organization (GO:0030199),2.114,0.0011,1.515,0.3156,loses significance
+raised in T2D,GO:BP,Inflammatory Response (GO:0006954),1.859,0.0138,1.033,0.8837,loses significance
+raised in T2D,Reactome,Collagen Formation,2.431,0.0,1.386,0.175,loses significance
+raised in T2D,Reactome,Extracellular Matrix Organization,2.274,0.0,1.308,0.2443,loses significance
+raised in T2D,Reactome,Collagen Degradation,2.223,0.0,1.588,0.0495,stays significant
+reduced in T2D,Reactome,tRNA Processing in the Mitochondrion,-3.056,0.0,-1.91,0.038,stays significant
+reduced in T2D,Reactome,rRNA Processing in the Mitochondrion,-2.922,0.0,-1.852,0.0459,stays significant
+reduced in T2D,Reactome,Mitochondrial RNA Degradation,-2.232,0.0051,-1.45,0.1855,loses significance
+reduced in T2D,Reactome,Regulation of Insulin Secretion,-0.954,0.7488,-1.885,0.0415,gains significance
+reduced in T2D,GO:BP,Regulation of Insulin Secretion (GO:0050796),1.29,0.317,-2.065,0.0333,gains significance
+reduced in T2D,GO:BP,Insulin Secretion (GO:0030073),-1.896,0.0981,-0.944,0.7229,not significant in either
+reduced in T2D,GO:BP,Mitochondrial Translation (GO:0032543),1.021,0.7099,2.002,0.0059,gains significance
+reduced in T2D,MSigDB Hallmark,Pancreas Beta Cells (single-set test),-1.798,,-1.755,,stable (nominal p 0.0008 -> 0.0012)

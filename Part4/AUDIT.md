@@ -1,0 +1,109 @@
+# Part 4: audit and validation report
+
+Independent re-execution from the raw count matrix and the stored Part 4 outputs.
+Last updated 26 November 2026.
+
+## Inputs, verified by checksum
+
+| File | Identity | Note |
+|------|----------|------|
+| `Part1_data_pipeline/gene_count_matrix.csv` | 62,754 genes x 16 donors | re-analysed from here |
+| `Part2_statistics/results/de_results.csv` | md5 `adb69afe...` | identical to the repository archive copy |
+| `Part4/scripts/part4_pathways_v2.py` | md5 `9e70cbc6...` | matches the script as written |
+| `genesets/MSigDB_Hallmark_2020.gmt` | sha256 `42755929...`, 50 sets, sizes 32-200 | `Pancreas Beta Cells` = the 40 genes listed on gsea-msigdb.org; `Hypoxia` = 200 genes |
+| `genesets/Reactome_Pathways_2024.gmt` | sha256 `1a7c43cb...`, 2,104 sets | see `GENESETS.md` |
+| `genesets/GO_Biological_Process_2025.gmt` | sha256 `0fc02458...`, 5,342 sets | see `GENESETS.md` |
+
+The working folder is not a git clone, so no commit hash is recorded.
+
+## 1. Validation table
+
+| Requirement | Verification performed | Evidence | Result |
+|---|---|---|---|
+| Dataset, donors, groups | Read `Table1_donors.csv`, `mapping_table.csv` | 8 T2D / 8 ND, 4+4 by sex, HbA1c >= 6.5 vs < 6.0 | VERIFIED AND CORRECT |
+| Batch structure | Derived batch from flowcell exactly as Part 2 does | batch A 6 T2D / 3 ND; batch B 2 T2D / 5 ND | VERIFIED AND CORRECT |
+| DESeq2 model, contrast, sign | Re-ran `~ batch + sex + group` in pydeseq2 0.7.0 | 19,072 genes; same 6 genes at FDR < 0.05; AK4 stat +5.78 (up in T2D), SLC2A2 -2.70 | VERIFIED AND CORRECT |
+| Full numerical agreement across implementations | Compared all 19,072 genes, not just significant names | baseMean r = 1.0000000; log2FC r = 0.9999935; Wald stat r = 0.9999893, Spearman 0.9999988, 15 genes differ by > 0.01; padj r = 0.9998 | APPROXIMATE AGREEMENT, not exact reproduction (different optimiser and shrinkage implementation) |
+| 19,072 / 17,358 / 6 / 306 | Recomputed each | filter gives 19,072; ranking gives 17,358 and is dataframe-identical to `ranked_list.csv`; 6 at FDR < 0.05; 274 up + 32 down = 306 at raw p < 0.01 | VERIFIED AND CORRECT |
+| Duplicate symbols, ties, excluded genes | Counted | 17,385 rows with a symbol, 17,358 unique; 53 rows share 26 symbols, resolved by largest \|stat\|; 1,687 genes (8.8%) have no symbol and are excluded | VERIFIED AND CORRECT |
+| Library coverage of the ranking | Intersected gmt membership with the ranking | GO:BP covers 11,801 of 17,358 (68%); Reactome 8,882 (51%) | ACCEPTABLE SCIENTIFIC LIMITATION, now documented |
+| Hallmark GSEA re-execution | Re-ran all 50 sets from the local gmt, seed 7 | NES r = 0.999960 against the stored run, 100% sign agreement, 26/26 significant sets identical, 0 sets change significance class | VERIFIED AND CORRECT |
+| Reactome GSEA re-execution | Re-ran 1,257 sets from the local gmt | NES r = 0.9999, 100% sign agreement | VERIFIED AND CORRECT |
+| g:Profiler re-execution | Re-queried the up-list live from the analysis machine, compared term by term | 94 terms both runs, identical term set, max absolute difference 0 in p_value, term_size, intersection_size, query_size and effective_domain_size. Both reported queries use a nominal p < 0.01 cutoff with g:SCS correction. The down-list re-execution is recorded in the next row | VERIFIED AND CORRECT for the up-list |
+| g:Profiler down-list re-execution | Re-queried the 32 down-regulated genes live from the analysis machine (`results/ora_gprofiler_down_rerun.csv`) | 32 genes submitted (console output), 0 significant terms returned; the saved file is a header row with no data rows, matching the original run exactly. Both g:Profiler queries, up and down, have now been re-executed live | VERIFIED AND CORRECT |
+| Independent enrichment implementation | Wrote a weighted Kolmogorov-Smirnov ES with gene-label permutation | Hallmark beta-cell set NES -1.798 against gseapy -1.8014 on the same ranking | PARTIAL: cross-checks ES, NES and nominal p for one set. It does not reproduce library-wide FDR, which the full gseapy rerun does |
+| Reported NES/FDR values | Checked 12 named sets against `gsea_all.csv` | all match to 2 decimal places | VERIFIED AND CORRECT |
+| "Hypoxia NES 2.72 vs 2.31" | Looked up every hypoxia-related set | Hallmark `Hypoxia` (200 genes) NES 2.7235; GO `Cellular Response to Hypoxia (GO:0071456)` (71 genes) NES 2.2904; Reactome `Cellular Response to Hypoxia` NES 0.77, FDR 1.0 | VERIFIED AND CORRECT: different gene sets, not an inconsistency |
+| Fadista four-gene comparison | Looked each up in the count matrix and `de_results.csv` | all four tested; TSPAN33 FDR 0.018; NT5E 0.657, TMED6 0.846, PAK5 0.844 not significantly differentially expressed | CORRECTED AND RETESTED |
+| g:Profiler query and background sizes | Read the result table | query_size 270 (274 submitted), effective_domain_size 18,909 (19,072 submitted) | CORRECTED AND RETESTED |
+| Correction method labelling | Checked g:Profiler parameters | `significance_threshold_method="g_SCS"`, g:Profiler's own graph-structure correction, not Benjamini-Hochberg FDR | CORRECTED AND RETESTED |
+| GSEA FDR threshold | Checked the official GSEA User Guide | the guide states that with a small number of samples gene_set permutation gives a less stringent significance assessment and that one should then use a more stringent FDR cutoff, such as 5%. We used 5%. The guide also recommends 1,000 permutations for either permutation type | VERIFIED AND CORRECT |
+| Permutation choice | Official GSEA User Guide, plus the design | gene-label permutation ignores gene-gene correlation. 8 donors per group meets the general sample-size recommendation for phenotype permutation, but phenotype permutation shuffles sample labels without preserving the batch and sex structure the design adjusts for, so ranking by the covariate-adjusted Wald statistic is the defensible trade | ACCEPTABLE SCIENTIFIC LIMITATION, now documented with both sides |
+| Power versus donor effect | 21 DESeq2 refits: baseline, 16 leave-one-out, 4 two-donor exclusions, identical NES computation (weighted KS, 2,000 gene-label permutations) throughout | hypoxia NES 2.31 baseline, 1.19 without P7/P8, 2.19-2.39 for three matched pairs; mean log2FC falls 88% against no fall for those pairs. ECM shows the same direction more weakly (NES 2.35 to 1.62, log2FC -43%). Beta-cell NES negative in all 21 refits, -0.98 to -2.42, with P7/P8 inside the range of the other 20 | CORRECTED AND RETESTED. Three comparison pairs were tested, not all 28 |
+| "Every raised pathway loses significance" | Full-library comparison in all three libraries | FALSE. In Hallmark, 14 of 26 lose, 12 keep, 15 gain. TNF-alpha, EMT and Inflammatory Response keep significance at 14-donor NES 2.18, 2.30 and 1.50 respectively | CORRECTED AND RETESTED |
+| Stability of the 14-donor fit | Counted NES sign changes library-wide | 18/50 Hallmark, 532/1,257 Reactome, 992/2,305 GO:BP change sign; significant-set counts move in opposite directions (GO:BP 182 to 62, Reactome 127 to 249) | ACCEPTABLE SCIENTIFIC LIMITATION, now documented and used to justify preferring the fixed-set comparison |
+| Model identifiability after exclusion | Checked batch x group | batch B has 0 T2D donors after exclusion; group effect rests on batch A | ACCEPTABLE SCIENTIFIC LIMITATION, stated in every document |
+| Cell composition | Compared Part 2 marker-based fractions between groups and located marker genes | endocrine 3.91% vs 2.98% (p = 0.42), acinar 4.50 vs 3.74 (p = 0.66), ductal 0.26 vs 0.35 (p = 0.41); INS +1.22, PRSS1 +1.24, KRT19 +1.28 all higher in T2D | ACCEPTABLE SCIENTIFIC LIMITATION: no clear evidence that composition explains the beta-cell result, and the difference does not run in the direction that explanation needs, but non-significance in 8 donors per group does not establish equivalence and a read fraction is not a beta-cell count. Cannot be excluded |
+| Figures match their tables | Re-plotted from the result CSVs and inspected the rendered images | no clipped dots, labels or legends; axis, colour and size mappings correct | CORRECTED AND RETESTED |
+| Literature supports each claim | Fetched each source; checked species and material | Olsson 2011 human islets (direct match); Hunter and Stein 2017 review; Haythorne 2019 mouse model and INS-1 rat line (direction only); Negi 2012 human islets; Fadista 2014 human islets, our own source cohort | CORRECTED AND RETESTED: species and material now stated |
+| Fadista agreement is not replication | Checked donor provenance | our 16 donors are a subset of their 89 | CORRECTED AND RETESTED |
+| Reproducibility on a fresh clone | requirements.txt, GENESETS.md with URLs and checksums, relative paths, no shell calls | documented in README | VERIFIED AND CORRECT |
+| Report page limit | Rendered to PDF and counted pages | see README of this audit section | CORRECTED AND RETESTED |
+
+## 2. Retracted or corrected claims
+
+| Earlier claim | Status | Replacement |
+|---|---|---|
+| PAK7 "filtered out for low expression" | RETRACTED | HGNC renamed PAK7 to PAK5; Ensembl 110 uses PAK5. The gene was tested: log2FC -0.62, p 0.176, FDR 0.844 |
+| g:Profiler used 274 genes against 19,072 | CORRECTED | 270 recognised of 274 submitted; effective background 18,909 of 19,072 |
+| g:Profiler is an "independent" check | CORRECTED | second method, same donors and same DESeq2 output |
+| Beta-cell signal "five orders of magnitude stronger" | RETRACTED | from a 30-gene set assembled after seeing the results. On the MSigDB set it is essentially unchanged: NES -1.798 to -1.755 |
+| "Every raised pathway loses significance" | RETRACTED | true for hypoxia, glycolysis and matrix sets; false for TNF-alpha, EMT and inflammatory response, which keep significance |
+| "The stress signature collapses, proving an artifact" | CORRECTED | it is specifically attributable to two donors, shown against matched exclusions and on gene-level effect size. Donor attribution is not the same as proof of a technical artifact |
+| Seven beta-cell genes "in the bottom 2%" | WITHDRAWN AS CIRCULAR | those genes were selected by Part 2 for trending down. Replaced by the 40-gene MSigDB set |
+| "Agrees with Fadista" | CORRECTED | our donors are a subset of theirs; this is a re-analysis |
+| "These genes don't differ" | CORRECTED | "were not significantly differentially expressed" |
+
+## 3. Unresolved
+
+Nothing material. Two items are bounded rather than open:
+
+- The 14-donor Hallmark comparison was run at 1,000 permutations, not 10,000, because the audit machine cannot hold the 10,000-permutation matrix. The 16-donor run at both settings agrees to r = 0.99996 with zero changes in significance class, so the effect on conclusions is negligible. Both rankings in the comparison used identical settings.
+- Part 3 does not exist, so no promoter or non-coding comparison was possible.
+
+## 4. Reproducing this
+
+```
+cd Part4
+python3 -m pip install -r requirements.txt
+python3 scripts/part4_pathways_v2.py        # main analysis, 16 donors
+python3 scripts/fix_ora_plot.py             # g:Profiler figure
+python3 scripts/replot_dotplots.py          # dot plots
+python3 scripts/part4_robustness.py         # 14-donor sensitivity
+python3 scripts/part4_donor_influence.py    # 21 refits, donor influence  (needs pydeseq2)
+python3 scripts/make_report_figures.py      # regenerate report figures
+```
+Seeds are 7 throughout. Gene-set provenance, URLs and checksums are in `GENESETS.md`.
+
+## 5. Final pre-submission checks
+
+| Item | Evidence | Result |
+|---|---|---|
+| Primary vs sensitivity permutation counts | Primary GSEA (`results/gsea_*.csv`) ran at 10,000 permutations. All sensitivity comparisons (`hallmark_sensitivity.csv`, `library_wide_sensitivity.csv`) ran at 1,000, identically for both rankings being compared. The GSEA User Guide recommends 1,000 for either permutation type, so this is a documented setting rather than a compromise. Every table states which applies | VERIFIED AND CORRECT |
+| Does any conclusion rest on a borderline FDR? | Pancreas Beta Cells, the load-bearing result, is FDR 0.004184 at 10,000 permutations and 0.0039 at 1,000, with NES -1.8014 and -1.7894: not borderline and stable across settings. Among the "keeps significance" claims only Inflammatory Response is borderline in the reduced cohort (FDR 0.0312); it is reported with its value rather than as a bare claim | VERIFIED AND CORRECT |
+| Does the ECM claim match the evidence? | ECM NES 2.35 to 1.62, below all three comparison pairs (2.12 to 2.55), mean log2FC -43%. Hypoxia is -88% and dips to 1.85 in single-donor fits while ECM never goes below 2.03. Same direction, weaker evidence; the text says so | CORRECTED AND RETESTED |
+| Statistic plotted in `donor_influence.png` | Normalised enrichment score: weighted Kolmogorov-Smirnov ES divided by the mean of same-sign gene-label permutations, 2,000 permutations, seed 7. Axis and captions label it NES | CORRECTED AND RETESTED |
+| Donor-sensitivity wording | Text now states that the analysis identifies which donors carry a result, not its cause. Isolation stress is presented as a plausible explanation supported by Negi et al. 2012, not a demonstrated one | CORRECTED AND RETESTED |
+| Scope of pair testing | Three comparison T2D pairs were tested, not all 28. Stated wherever the comparison is used | CORRECTED AND RETESTED |
+| File manifest | See README for the intended analysis files, including the report figure script and outputs. Exclude `genesets/`, `_to_delete/`, and the individual report | Confirm actual staged file list before committing |
+| Report length | Rendered to PDF with figures and table removed: body text occupies exactly 3 pages, references on a separate 4th | VERIFIED AND CORRECT |
+
+## Why gene-label permutation rather than phenotype permutation
+
+Phenotype permutation is admissible at eight donors per group, but it shuffles sample labels
+without preserving the batch and sex structure that the DESeq2 design `~ batch + sex + group`
+adjusts for. Ranking by the covariate-adjusted Wald statistic keeps that adjustment, at the cost
+of the weaker gene-label null. The GSEA User Guide states that gene_set permutation gives a less
+stringent significance assessment with few samples and that a 5% FDR cutoff should then be used,
+which is the cutoff applied throughout. This paragraph was cut from the report body to meet the
+2-3 page limit; the reasoning is recorded here.
