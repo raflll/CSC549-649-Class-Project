@@ -9,7 +9,7 @@ report, including what was checked and what was corrected, is in `AUDIT.md`.
 
 | file | content |
 |------|---------|
-| `results/ranked_list.csv` | all 17,358 symbol-annotated genes ranked by the DESeq2 Wald statistic |
+| `results/ranked_list.csv` | 17,358 unique gene symbols ranked by the DESeq2 Wald statistic |
 | `results/gsea_MSigDB_Hallmark_2020.csv` | GSEA, 50 Hallmark sets |
 | `results/gsea_Reactome_Pathways_2024.csv` | GSEA, 1,257 Reactome sets |
 | `results/gsea_GO_Biological_Process_2025.csv` | GSEA, 2,305 GO:BP sets |
@@ -96,4 +96,4 @@ notes this mode is less conservative than phenotype permutation and that FDR < 0
 is the appropriate threshold for it, which is what we use.
 
 g:Profiler: custom background of the tested genes, g:SCS correction (g:Profiler's own correction
-for GO and Reactome graph structure, not Benjamini-Hochberg).
+for the annotated gene-set structure, not Benjamini-Hochberg). The GSEA FDR is estimated separately within each library; g:Profiler queries use their own correction. Finite Wald statistics were retained even when Part 2 suppressed a nominal p-value (73 ranked symbols have such flags). The archived ranking is preserved; see `note.txt` for the limitation.

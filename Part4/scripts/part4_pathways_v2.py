@@ -147,8 +147,9 @@ if not a.skip_ora:
                 sc = ax.scatter(d["gene_ratio"], d["name"].str.slice(0, 55),
                                 s=20 + 12 * d["intersection_size"],
                                 c=-np.log10(d["p_value"].clip(lower=np.finfo(float).tiny)), cmap="viridis", edgecolor="k", lw=.4)
-                ax.set_xlabel("gene ratio")
-                ax.set_title(f"g:Profiler ORA, genes {k} in T2D (exploratory, raw p<{a.p_cut})", fontsize=10)
+                ax.margins(x=.15, y=.10)
+                ax.set_xlabel("gene ratio (overlap / recognized query genes)")
+                ax.set_title(f"g:Profiler ORA, genes {k} in T2D (exploratory, raw p<{a.p_cut})\nDot area reflects overlap count", fontsize=10)
                 fig.colorbar(sc, label="-log10 adjusted p", shrink=.6)
                 fig.tight_layout(); fig.savefig(f"{FIG}/dotplot_ora_{k}.png", dpi=200); plt.close(fig)
     except Exception as e:
@@ -156,7 +157,9 @@ if not a.skip_ora:
 
 # ---------------------------------------------------------------- checks for interpretation
 fad = ["TSPAN33", "NT5E", "TMED6", "PAK5"]   # PAK7 was renamed PAK5 by HGNC; Ensembl 110 uses PAK5
-chk = de[de.symbol.isin(fad)][["symbol", "baseMean", "log2FoldChange", "pvalue", "padj"]]
+chk = de.loc[de.symbol.isin(fad), ["symbol", "ensembl", "baseMean", "log2FoldChange", "stat", "pvalue", "padj"]].copy()
+chk.insert(0, "fadista_name", chk.symbol.replace({"PAK5": "PAK7 (now PAK5)"}))
+chk = chk.sort_values("pvalue")
 chk.to_csv(f"{RES}/fadista_silenced_genes_check.csv", index=False)
 missing = [g for g in fad if g not in set(chk.symbol)]
 

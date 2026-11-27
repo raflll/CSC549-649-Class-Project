@@ -30,9 +30,10 @@ for k, d in O.groupby("direction"):
     sc = ax.scatter(d["gene_ratio"], d["name"].astype(str).str.slice(0, 55),
                     s=20 + 12 * d["intersection_size"],
                     c=-np.log10(d["p_value"]), cmap="viridis", edgecolor="k", lw=.4)
-    ax.set_xlabel("gene ratio (genes in the term / genes in the list)")
+    ax.margins(x=.15, y=.10)
+    ax.set_xlabel("gene ratio (overlap / recognized query genes)")
     ax.set_title(f"g:Profiler over-representation, genes {k} in T2D\n"
-                 f"exploratory: raw p<0.01 list, {int(d['query_size'].iloc[0])} genes", fontsize=10)
+                 f"exploratory: raw p<0.01 list, {int(d['query_size'].iloc[0])} genes; area reflects overlap", fontsize=10)
     fig.colorbar(sc, label="-log10 adjusted p", shrink=.6)
     fig.tight_layout()
     out = f"figures/dotplot_ora_{k}.png"

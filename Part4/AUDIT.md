@@ -9,7 +9,7 @@ Last updated 26 November 2026.
 |------|----------|------|
 | `Part1_data_pipeline/gene_count_matrix.csv` | 62,754 genes x 16 donors | re-analysed from here |
 | `Part2_statistics/results/de_results.csv` | md5 `adb69afe...` | identical to the repository archive copy |
-| `Part4/scripts/part4_pathways_v2.py` | sha256 `3ec89a16559a8417fd3b604a8be59b281b0b6b3a926895410bab1d4f33fdc744` | corrected script; full rerun pending |
+| `Part4/scripts/part4_pathways_v2.py` | sha256 `bd66c6a913aae6f29df01dce8ef5a6b6541847a0cb188fe9d0e7231ec2246dd0` | corrected script; full rerun pending |
 | `genesets/MSigDB_Hallmark_2020.gmt` | sha256 `42755929...`, 50 sets, sizes 32-200 | `Pancreas Beta Cells` = the 40 genes listed on gsea-msigdb.org; `Hypoxia` = 200 genes |
 | `genesets/Reactome_Pathways_2024.gmt` | sha256 `1a7c43cb...`, 2,104 sets | see `GENESETS.md` |
 | `genesets/GO_Biological_Process_2025.gmt` | sha256 `0fc02458...`, 5,342 sets | see `GENESETS.md` |
@@ -43,7 +43,7 @@ The reviewed source was a repository ZIP snapshot; no commit hash is embedded in
 | "Every raised pathway loses significance" | Full-library comparison in all three libraries | FALSE. In Hallmark, 14 of 26 lose, 12 keep, 15 gain. TNF-alpha, EMT and Inflammatory Response keep significance at 14-donor NES 2.18, 2.30 and 1.50 respectively | CORRECTED AND RETESTED |
 | Stability of the 14-donor fit | Counted NES sign changes library-wide | 18/50 Hallmark, 532/1,257 Reactome, 992/2,305 GO:BP change sign; significant-set counts move in opposite directions (GO:BP 182 to 62, Reactome 127 to 249) | ACCEPTABLE SCIENTIFIC LIMITATION, now documented and used to justify preferring the fixed-set comparison |
 | Model identifiability after exclusion | Checked batch x group | batch B has 0 T2D donors after exclusion; group effect rests on batch A | ACCEPTABLE SCIENTIFIC LIMITATION, stated in every document |
-| Cell composition | Compared Part 2 marker-based fractions between groups and located marker genes | endocrine 3.91% vs 2.98% (p = 0.42), acinar 4.50 vs 3.74 (p = 0.66), ductal 0.26 vs 0.35 (p = 0.41); INS +1.22, PRSS1 +1.24, KRT19 +1.28 all higher in T2D | ACCEPTABLE SCIENTIFIC LIMITATION: no clear evidence that composition explains the beta-cell result, and the difference does not run in the direction that explanation needs, but non-significance in 8 donors per group does not establish equivalence and a read fraction is not a beta-cell count. Cannot be excluded |
+| Cell composition | Compared Part 2 marker-based fractions between groups and located marker genes | endocrine 3.91% vs 2.98% (p = 0.42), acinar 4.50 vs 3.74 (p = 0.66), ductal 0.26 vs 0.35 (p = 0.41); INS +1.22, PRSS1 +1.24, KRT19 +1.28 all higher in T2D | ACCEPTABLE SCIENTIFIC LIMITATION: no clear evidence that composition explains the beta-cell result, but non-significance in 8 donors per group does not establish equivalence and a read fraction is not a beta-cell count. Cannot be excluded |
 | Figures match their tables | Re-plotted from the result CSVs and inspected the rendered images | no clipped dots, labels or legends; axis, colour and size mappings correct | CORRECTED AND RETESTED |
 | Literature supports each claim | Fetched each source; checked species and material | Olsson 2011 human islets (direct match); Hunter and Stein 2017 review; Haythorne 2019 mouse model and INS-1 rat line (direction only); Negi 2012 human islets; Fadista 2014 human islets, our own source cohort | CORRECTED AND RETESTED: species and material now stated |
 | Fadista agreement is not replication | Checked donor provenance | our 16 donors are a subset of their 89 | CORRECTED AND RETESTED |
@@ -58,7 +58,7 @@ The reviewed source was a repository ZIP snapshot; no commit hash is embedded in
 | g:Profiler used 274 genes against 19,072 | CORRECTED | 270 recognised of 274 submitted; effective background 18,909 of 19,072 |
 | g:Profiler is an "independent" check | CORRECTED | second method, same donors and same DESeq2 output |
 | Beta-cell signal "five orders of magnitude stronger" | RETRACTED | from a 30-gene set assembled after seeing the results. On the MSigDB set it is essentially unchanged: NES -1.798 to -1.755 |
-| "Every raised pathway loses significance" | RETRACTED | true for hypoxia, glycolysis and matrix sets; false for TNF-alpha, EMT and inflammatory response, which keep significance |
+| "Every raised pathway loses significance" | RETRACTED | true for hypoxia, glycolysis and several matrix sets; false for TNF-alpha, EMT, inflammatory response and Reactome collagen degradation, which keep significance |
 | "The stress signature collapses, proving an artifact" | CORRECTED | hypoxia is sensitive to P7/P8 exclusion; same-size comparison pairs are from batch A, unlike P7/P8 from batch B. Donor and batch effects cannot be separated cleanly, and isolation stress is not proven |
 | Seven beta-cell genes "in the bottom 2%" | WITHDRAWN AS CIRCULAR | those genes were selected by Part 2 for trending down. Replaced by the 40-gene MSigDB set |
 | "Agrees with Fadista" | CORRECTED | our donors are a subset of theirs; this is a re-analysis |
@@ -66,7 +66,7 @@ The reviewed source was a repository ZIP snapshot; no commit hash is embedded in
 
 ## 3. Unresolved
 
-Nothing material. Two items are bounded rather than open:
+The corrected full pipeline remains unexecuted in the review environment. Two additional qualifications:
 
 - The 14-donor Hallmark comparison was run at 1,000 permutations, not 10,000, because the audit machine cannot hold the 10,000-permutation matrix. The 16-donor run at both settings agrees to r = 0.99996 with zero changes in significance class, so the effect on conclusions is negligible. Both rankings in the comparison used identical settings.
 - Part 3 is now present in `../Part3_promoters_ncrna/`. Its 20/22 negative mitochondrial tRNA fold changes agree in direction with the mitochondrial RNA-processing enrichment, subject to shared data and poly-A selection limitations.
@@ -105,3 +105,13 @@ The updated scripts remove the obsolete hand-picked rank test, use matched 1,000
 `python scripts/check_results.py` passed against the repository snapshot: 19,072 tested genes, 17,358 ranked genes, 6 DE genes, 274/32 ORA queries, identical original/repeat 94-term ORA tables, no down-query terms, matching individual/combined GSEA tables (26/125/173 significant sets), matching Hallmark sensitivity classifications (14 lost, 12 kept, 15 gained, 18 sign flips), and 21 stored refits with negative beta-cell NES. All Python files parsed. All three offline plotting scripts executed.
 
 The exact GMT files and the GSEApy, g:Profiler and PyDESeq2 packages were unavailable in the review environment; the corrected full analysis has not been re-executed. Stored primary results and donor refits were retained. The revised sensitivity script can recreate the comparison tables from the archived 16/14-donor DE tables; the 14-donor input is itself an archived fit and can be regenerated with the donor-influence script. Future live g:Profiler results may change with the database.
+
+## Independent check of the final snapshot
+
+The Part 1 count filter yields exactly the 19,072 Part 2 identifiers. Recalculated Wald statistics, available normal-tail p-values and BH-adjusted p-values match to within 1e-12. All 3,612 GSEA rows have valid ES/NES signs, probability ranges, and leading-edge members, counts and order. Both archived ORA tables agree; the leading term has 28 hits, 249 term members, query size 270 and background 18,909. The unadjusted hypergeometric tail is 2.72e-17, distinct from g:SCS-adjusted p=1.36e-12. Live ORA was not repeated in this environment.
+
+An independent sparse running-sum implementation using public Enrichr Hallmark memberships and 10,000 random gene-set permutations reproduces the beta-cell and hypoxia ES to about 1e-15 (ES -0.430895267153 and +0.663927247740; independent NES -1.8140 and +2.7246 versus archived -1.8014 and +2.7235). The original ranking retains 73 symbols associated with 85 rows with missing nominal p-values, consistent with DESeq2 outlier filtering. Excluding these symbols gives ES -0.430949870860 and +0.662216515651 respectively. These are checks of two sets only, not new library-wide FDR estimates.
+
+The two mitochondrial RNA-processing pathways are reduced, but neither Hallmark nor GO oxidative phosphorylation is significantly reduced. The literature comparison has been qualified accordingly. The archived 14-donor DE table has four significant genes (SAA2, PCOLCE2, GNAL, SAA1), none of the original six, matching the Part 2 sensitivity count. The three composition-proxy Welch tests and Part 3's 20/22 negative mitochondrial tRNA fold changes were independently recalculated.
+
+The primary Fadista lookup now writes the same columns and aliases as the archived table; ORA plots have adequate axis margins. All archived numerical results are unchanged. Full rerun remains pending because the exact packages and GMTs could not be fetched in the execution environment.
